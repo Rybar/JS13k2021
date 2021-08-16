@@ -9,8 +9,8 @@ import Splode from './splode.js';
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
-const w = 320;
-const h = 180;
+const w = Math.floor(innerWidth/4);
+const h = Math.floor(innerHeight/4);
 const mw = w/2; const mh = h/2;
 let paused = false;
 
@@ -178,9 +178,12 @@ function pruneDead(entitiesArray){
 
 
 function gameloop(){
+  stats
   if(!paused){
+    stats.begin();
     step();
     drawGame();
+    stats.end();
   }
   requestAnimationFrame(gameloop);
 
