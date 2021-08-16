@@ -1,4 +1,4 @@
-##JS13K 2021 Untitled Space Game
+## JS13K 2021 Untitled Space Game
 
 
 Built using @herebefrogs gamejam boilerplate for build automation.
@@ -15,6 +15,8 @@ npm start
 
 npm run build
 -> build game for gamejam submission (no sourcemap and livereload script)
+
+```
 
 
 Special Thanks
