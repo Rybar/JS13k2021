@@ -1,0 +1,8 @@
+{
+  "collapseBooleanAttributes": false,
+  "collapseInlineTagWhitespace": true,
+  "collapseWhitespace": true,
+  "removeAttributeQuotes": true,
+  "removeComments": true,
+  "minifyCSS": true
+}
