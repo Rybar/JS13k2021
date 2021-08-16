@@ -9,8 +9,8 @@ import Splode from './splode.js';
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
-const w = Math.floor(innerWidth/4);
-const h = Math.floor(innerHeight/4);
+const w = Math.floor(innerWidth/3);
+const h = Math.floor(innerHeight/3);
 const mw = w/2; const mh = h/2;
 let paused = false;
 
@@ -82,63 +82,12 @@ function step(){
 }
 
 splodes = [];
-bullets = [];
-triangles= [];
-for(let i = 0; i < 30; i++){
-  let cx = Math.random() *  w,
-      cy = Math.random() *  h,
-      rad = 100;
-      p1x = cx + (Math.random() * 2 - 1) * rad;
-      p1y = cy + (Math.random() * 2 - 1) * rad;
-      p2x = cx + (Math.random() * 2 - 1) * rad; 
-      p2y = cy + (Math.random() * 2 - 1) * rad;
-      p3x = cx + (Math.random() * 2 - 1) * rad;
-      p3y = cy + (Math.random() * 2 - 1) * rad;
-
-  triangles.push( {
-    p1: {x: p1x, y: p1y},
-    p2: {x: p2x, y: p2y},
-    p3: {x: p3x, y: p3y},
-    color: 28 + Math.random() * 3,
-    dither: Math.floor(Math.random()*16)
-  });
-
-}
-
-function drawTriangleDemo(){
-  //r.clear(1, r.SCREEN);
-  //r.renderTarget = r.SCREEN;
-  
-  
-  triangles.forEach(function(triangle){
-    /*
-var rotatedX = Math.cos(angle) * (point.x - center.x) - Math.sin(angle) * (point.y-center.y) + center.x;
-var rotatedY = Math.sin(angle) * (point.x - center.x) + Math.cos(angle) * (point.y - center.y) + center.y;
-
-    */
-    r.pat = r.dither[14];
-    p1.x = Math.cos(t/100) * (triangle.p1.x - mh) - Math.sin(t/100) * (triangle.p1.y - mh) + mh;
-    p1.y = Math.sin(t/100) * (triangle.p1.x - mh) + Math.cos(t/100) * (triangle.p1.y - mh) + mh;
-    p2.x = Math.cos(t/100) * (triangle.p2.x - mh) - Math.sin(t/100) * (triangle.p2.y - mh) + mh;
-    p2.y = Math.sin(t/100) * (triangle.p2.x - mh) + Math.cos(t/100) * (triangle.p2.y - mh) + mh;
-    p3.x = Math.cos(t/100) * (triangle.p3.x - mh) - Math.sin(t/100) * (triangle.p3.y - mh) + mh;
-    p3.y = Math.sin(t/100) * (triangle.p3.x - mh) + Math.cos(t/100) * (triangle.p3.y - mh) + mh;
-    r.pat = r.dither[triangle.dither];
-    r.fillTriangle(p1, p2, p3, triangle.color);
-    r.triangle(p1,p2,p3,triangle.color-1);
-
-  })
-   
-  r.render();
-}
 
 function drawGame(){
   r.clear(0, r.SCREEN);
   r.renderTarget = r.SCREEN;
-  drawTriangleDemo();
-  //r.fillCircle(p.x, p.y, 10, 8);
+  
   splodes.forEach(splode=>{splode.draw()})
-  bullets.forEach(bullet=>{bullet.draw()})
   //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
   r.pat = r.dither[8]
   r.text(["JS13K", w/2-2, 100+2, 7, 1, 'center', 'center', 8, 7]);

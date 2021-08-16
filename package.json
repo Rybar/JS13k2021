@@ -8,7 +8,7 @@
     "build": "run-s clean build:*",
     "build:js": "rollup -c scripts/rollup.config.js --environment MINIFY",
     "build:html": "grep -v body src/index.html | html-inline -b dist | html-minifier -c scripts/htmlmin.json -o dist/index.html",
-    "build:zip": "zip -FS -qjX9 dist/game.zip dist/index.html && advzip -z -4 -i 20 dist/game.zip",
+    "build:zip": "zip -FS -qjX9 dist/game.zip dist/index.html && advzip -z -4 -i 400 dist/game.zip",
     "build:zipSize": "node scripts/zipSize.js",
     "start": "npm-run-all -s clean -p dev:*",
     "dev:js": "rollup -c scripts/rollup.config.js -w --environment DEBUG",
