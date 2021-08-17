@@ -25,14 +25,14 @@ export default {
     // TODO shouldn't I always run terser to debug the game I use?
     MINIFY &&
       terser({
-        ecma: 9,
+        ecma: 2016,
         module: true,
         toplevel: true,
         compress: {
           keep_fargs: false,
-          passes: 10,
-          pure_funcs: ['assert', 'debug'],
-          pure_getters: true,
+          passes: 4,
+          //pure_funcs: ['assert', 'debug'],
+          //pure_getters: true,
           unsafe: true,
           unsafe_arrows: true,
           unsafe_comps: true,

@@ -1,9 +1,9 @@
-function RetroBuffer(width, height){
+var RetroBuffer = function(width, height, pages){
 
     this.WIDTH =     width;
     this.HEIGHT =    height;
     this.PAGESIZE = this.WIDTH *  this.HEIGHT;
-    this.PAGES = 3;
+    this.PAGES = pages;
   
     this.SCREEN = 0;
     this.PAGE_1= this.PAGESIZE;
@@ -147,13 +147,15 @@ function RetroBuffer(width, height){
     this.data =            new Uint32Array(this.buf),
     this.ram =             new Uint8Array(this.WIDTH * this.HEIGHT * this.PAGES);
   
-    return this;
-  }
+    
   
   //--------------graphics functions----------------
  
-  RetroBuffer.prototype.clear = function clear(color, page){
+  this.clear = function (color, page){
     this.ram.fill(color, page, page + this.PAGESIZE);
+  }
+
+  return this;
   }
 
   RetroBuffer.prototype.setPen = function(color, color2, dither=0){
@@ -481,7 +483,8 @@ RetroBuffer.prototype.textLine = function textLine(o) {
             let cy = 0;
 						this.pset(
 							o[1] + ( x * o[4] ) + ( ( size * o[4] ) + o[3] ) * i,
-              ( o[2] + (y * o[4]) )|0
+              ( o[2] + (y * o[4]) )|0,
+              o[5]
               );
 					}
 
