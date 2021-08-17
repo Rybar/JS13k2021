@@ -11,12 +11,12 @@ Planet.prototype.draw = function(){
 Planet.prototype.update = function(){
     let distx = this.x - p.x;
     let disty = this.y - p.y;
-    let dist = Math.sqrt(distx*distx + disty*disty);
-    if( dist <= this.radius + p.radius ){
-        p.colliding = true;
-        p.onPlanet(this);
-    }else {
-        p.colliding = false;
+    if(!p.onPlanetSurface){
+
+        let dist = Math.sqrt(distx*distx + disty*disty);
+        if( dist <= this.radius + p.radius ){
+            p.onPlanet(this);
+        }
     }
 }
 

@@ -20,7 +20,7 @@ paused = false;
 
 
 p = Player;
-p.x = 100; p.y = 100;
+p.x = 150; p.y = 100;
 
 r = new RetroBuffer(w,h,3);
 window.playSound = playSound;
@@ -37,9 +37,10 @@ sounds = {};
 soundsReady = 0;
 totalSounds = 2;
 audioTxt = "";
+debugText = "";
 
 function initGameData(){
-  planets.push(new Planet(mw, mh, 40, 53));
+  planets.push(new Planet(mw, mh, 70, 53));
 }
 
 function initAudio(){
