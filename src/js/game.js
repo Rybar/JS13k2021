@@ -3,11 +3,13 @@ import MusicPlayer from './musicplayer.js';
 import song from './song.js';
 import cellComplete from './cellComplete.js';
 import { playSound, Key } from './utils.js';
-import Stats from './Stats.js';
+//import Stats from './Stats.js';
 import Splode from './splode.js';
+import Player from './player.js';
+import Planet from './planet.js';
 
-stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+//stats = new Stats();
+//stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
 w = Math.floor(innerWidth/3);
 h = Math.floor(innerHeight/3);
@@ -17,16 +19,14 @@ gamestate=0;
 paused = false;
 
 
-p = {
-  x: 100,
-  y: 100
-}
+p = Player;
+p.x = 100; p.y = 100;
 
 r = new RetroBuffer(w,h,3);
 window.playSound = playSound;
 gamebox = document.getElementById("game");
 gamebox.appendChild(r.c);
-document.body.appendChild( stats.dom );
+//document.body.appendChild( stats.dom );
 
 window.t = 1;
 splodes = [];
@@ -37,6 +37,10 @@ sounds = {};
 soundsReady = 0;
 totalSounds = 2;
 audioTxt = "";
+
+function initGameData(){
+  planets.push(new Planet(mw, mh, 40, 53));
+}
 
 function initAudio(){
   console.log('audio initializing');
@@ -71,12 +75,24 @@ function initAudio(){
   })
 }
 
+
+/*
+  ______                                            ______     __                 __                         
+ /      \                                          /      \   |  \               |  \                        
+|  $$$$$$\  ______   ______ ____    ______        |  $$$$$$\ _| $$_     ______  _| $$_     ______    _______ 
+| $$ __\$$ |      \ |      \    \  /      \       | $$___\$$|   $$ \   |      \|   $$ \   /      \  /       \
+| $$|    \  \$$$$$$\| $$$$$$\$$$$\|  $$$$$$\       \$$    \  \$$$$$$    \$$$$$$\\$$$$$$  |  $$$$$$\|  $$$$$$$
+| $$ \$$$$ /      $$| $$ | $$ | $$| $$    $$       _\$$$$$$\  | $$ __  /      $$ | $$ __ | $$    $$ \$$    \ 
+| $$__| $$|  $$$$$$$| $$ | $$ | $$| $$$$$$$$      |  \__| $$  | $$|  \|  $$$$$$$ | $$|  \| $$$$$$$$ _\$$$$$$\
+ \$$    $$ \$$    $$| $$ | $$ | $$ \$$     \       \$$    $$   \$$  $$ \$$    $$  \$$  $$ \$$     \|       $$
+  \$$$$$$   \$$$$$$$ \$$  \$$  \$$  \$$$$$$$        \$$$$$$     \$$$$   \$$$$$$$   \$$$$   \$$$$$$$ \$$$$$$$ 
+                                                                                                             
+                                                                                                                                                                                                                       
+*/
 function updateGame(){
   t+=1;
-  splodes.push(new Splode(Math.random()*w, Math.random()*h, Math.random()*70, 16+Math.random()*4) );
-
-  if(Key.isDown(Key.LEFT)){ p.x -= 1}
-  else if(Key.isDown(Key.RIGHT)){p.x += 1}
+  if(Key.isDown(Key.LEFT)){p.moveLeft()}
+  else if(Key.isDown(Key.RIGHT)){p.moveRight()}
   if(Key.isDown(Key.UP)){p.y -= 1}
   else if(Key.isDown(Key.DOWN)){p.y += 1}
   if(Key.justReleased(Key.d)){
@@ -86,16 +102,33 @@ function updateGame(){
     playSound(sounds.cellComplete)
   }
   splodes.forEach(e=>e.update());
+  planets.forEach(e=>e.update());
+  p.update();
   pruneDead(splodes);
+}
+
+function drawGame(){
+  r.clear(0, r.SCREEN);
+  r.renderTarget = r.SCREEN;
+  
+  planets.forEach(e=>e.draw());
+  splodes.forEach(e=>e.draw());
+  
+  p.draw();
+
+  r.render();
+
 }
 
 function titlescreen(){
   r.clear(0,r.SCREEN);
   splodes.forEach(splode=>{splode.draw()})
+  //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
   r.text(["UNTITLED SPACE GAME", w/2-2, 50, 1, 3, 'center', 'top', 3, 7]);
   r.text([audioTxt, w/2-2, 90, 1, 3, 'center', 'top', 1, 22]);
   if(Key.justReleased(Key.UP) || Key.justReleased(Key.W) || Key.justReleased(Key.Z)){
     if(soundsReady == 0){
+    initGameData();
     initAudio();
     }else {
       playSound(sounds.song, 1,0,0.3, true);
@@ -110,22 +143,6 @@ function titlescreen(){
     audioTxt = "CLICK TO INITIALIZE\nLOADING SEQUENCE";
   }
   r.render();
-}
-
-function drawGame(){
-  r.clear(0, r.SCREEN);
-  r.renderTarget = r.SCREEN;
-  
-  splodes.forEach(splode=>{splode.draw()})
-  //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
-  r.pat = r.dither[8]
-  r.text(["JS13K", w/2-2, 100+2, 7, 1, 'center', 'center', 8, 7]);
-  r.pat = r.dither[0]
-  r.text(["JS13K", w/2, 100, 7, 1, 'center', 'center', 8, 8]);
-  r.text(["0 DAYS TIL", w/2-2, 50, 3, 1, 'center', 'center', 4, 22]);
-
-  r.render();
-
 }
 
 //initialize  event listeners--------------------------
@@ -148,14 +165,15 @@ onclick=e=>{
   switch(gamestate){
       case 0: // react to clicks on screen 0s
         if(soundsReady == 0){
+          initGameData();
           initAudio();
-        }else if(soundsReady == totalSounds) {gamestate = 1;}
+        }else if(soundsReady == totalSounds) {gamestate = 1;playSound(sounds.song, 1,0,0.3, true);}
       break;
       case 1: // react to clicks on screen 1
       case 2: // react to clicks on screen 2
       case 3: // react to clicks on screen 3
   }
-  }
+}
 
 function pruneDead(entitiesArray){
   for(let i = 0; i < entitiesArray.length; i++){
@@ -168,8 +186,8 @@ function pruneDead(entitiesArray){
 
 
 function gameloop(){
-  if(!paused){
-    stats.begin();
+  if(1==1){
+    //stats.begin();
     switch(gamestate){
       case 0: //title screen
         titlescreen();
@@ -183,7 +201,7 @@ function gameloop(){
         break;
     }
     Key.update();
-    stats.end();
+    //stats.end();
     requestAnimationFrame(gameloop);
   }
 }
