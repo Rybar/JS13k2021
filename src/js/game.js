@@ -20,7 +20,7 @@ paused = false;
 
 
 p = Player;
-p.x = 150; p.y = 100;
+p.x = 50; p.y = 50;
 
 r = new RetroBuffer(w,h,3);
 window.playSound = playSound;
@@ -40,7 +40,8 @@ audioTxt = "";
 debugText = "";
 
 function initGameData(){
-  planets.push(new Planet(mw, mh, 70, 53));
+  planets.push(new Planet(mw-100, mh, 40, 53));
+  planets.push(new Planet(mw+100, mh, 70, 54));
 }
 
 function initAudio(){
@@ -94,8 +95,8 @@ function updateGame(){
   t+=1;
   if(Key.isDown(Key.LEFT)){p.moveLeft()}
   else if(Key.isDown(Key.RIGHT)){p.moveRight()}
-  if(Key.isDown(Key.UP)){p.y -= 1}
-  else if(Key.isDown(Key.DOWN)){p.y += 1}
+  if(Key.isDown(Key.UP)){p.moveUp()}
+  else if(Key.isDown(Key.DOWN)){p.moveDown()}
   if(Key.justReleased(Key.d)){
     for(let i = 10; i > 0; i--){
     splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
