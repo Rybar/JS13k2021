@@ -4,7 +4,7 @@ function Planet(x,y, radius, color){
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.field = this.radius + 40;
+    this.field = this.radius + 30;
     this.color = color;
     this.gravity = 0.1;
     return this;
@@ -20,15 +20,12 @@ Planet.prototype.update = function(){
     let dist = Math.sqrt(distx*distx + disty*disty);
     if( dist <= this.field + p.radius ){
 
-        if(!p.onPlanetSurface){
+        if(!p.withinPlanetGravity){
             p.onPlanet(this);
-            
         }   
 
     }
-    if(dist <= this.radius){
-        p.colliding=true;
-    }
+    
     
 }
 

@@ -4,7 +4,6 @@ import song from './song.js';
 import cellComplete from './cellComplete.js';
 import { playSound, Key } from './utils.js';
 //import Stats from './Stats.js';
-import Splode from './splode.js';
 import Player from './player.js';
 import Planet from './planet.js';
 
@@ -40,7 +39,7 @@ audioTxt = "";
 debugText = "";
 
 function initGameData(){
-  planets.push(new Planet(mw-100, mh, 40, 53));
+  planets.push(new Planet(mw-70, mh, 40, 53));
   planets.push(new Planet(mw+100, mh, 70, 54));
 }
 
@@ -93,16 +92,7 @@ function initAudio(){
 */
 function updateGame(){
   t+=1;
-  if(Key.isDown(Key.LEFT)){p.moveLeft()}
-  else if(Key.isDown(Key.RIGHT)){p.moveRight()}
-  if(Key.isDown(Key.UP)){p.moveUp()}
-  else if(Key.isDown(Key.DOWN)){p.moveDown()}
-  if(Key.justReleased(Key.d)){
-    for(let i = 10; i > 0; i--){
-    splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
-    }
-    playSound(sounds.cellComplete)
-  }
+  
   splodes.forEach(e=>e.update());
   planets.forEach(e=>e.update());
   p.update();
@@ -128,7 +118,7 @@ function titlescreen(){
   //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
   r.text(["UNTITLED SPACE GAME", w/2-2, 50, 1, 3, 'center', 'top', 3, 7]);
   r.text([audioTxt, w/2-2, 90, 1, 3, 'center', 'top', 1, 22]);
-  if(Key.justReleased(Key.UP) || Key.justReleased(Key.W) || Key.justReleased(Key.Z)){
+  if(Key.justReleased(Key.UP) || Key.justReleased(Key.w) || Key.justReleased(Key.z)){
     if(soundsReady == 0){
     initGameData();
     initAudio();
@@ -138,7 +128,7 @@ function titlescreen(){
     }
   }; 
   if(soundsReady == totalSounds){
-    audioTxt="ALL SOUNDS LOADED.\nPRESS UP/W/Z TO CONTINUE";
+    audioTxt="ALL SOUNDS LOADED.\nCLICK OR PRESS UP/W/Z TO CONTINUE";
   } else if (soundsReady > 0){
     audioTxt = "SOUNDS LOADING... " + soundsReady;
   } else {
