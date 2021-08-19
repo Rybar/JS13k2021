@@ -2,16 +2,21 @@ import RetroBuffer from './retrobuffer.js';
 import MusicPlayer from './musicplayer.js';
 import song from './song.js';
 import cellComplete from './cellComplete.js';
-import { playSound, Key } from './utils.js';
+import { playSound, Key, choice, inView } from './utils.js';
 //import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
+import Artifact from './artifact.js';
 
 //stats = new Stats();
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
 w = Math.floor(innerWidth/3);
 h = Math.floor(innerHeight/3);
+view = {
+  x: 0,
+  y: 0,
+}
 mw = w/2; mh = h/2;
 k=[]
 gamestate=0;
@@ -19,7 +24,7 @@ paused = false;
 
 
 p = Player;
-p.x = 50; p.y = 50;
+p.x = 3000; p.y = 3000;
 
 r = new RetroBuffer(w,h,3);
 window.playSound = playSound;
@@ -31,6 +36,9 @@ window.t = 1;
 splodes = [];
 planets = [];
 sndData = [];
+stars = [];
+collected = [];
+artifacts = [];
 
 sounds = {};
 soundsReady = 0;
@@ -39,8 +47,44 @@ audioTxt = "";
 debugText = "";
 
 function initGameData(){
+  for(let i = 0; i < 150; i++){
+    let p = new Planet();
+    p.x = Math.floor(Math.random()*(6000));
+    p.y = Math.floor(Math.random()*(6000));
+    p.radius = Math.floor(Math.random()*(100))+20;
+    p.field = p.radius + Math.floor(Math.random()*(20)) + 30;
+    p.color = Math.floor(Math.random()*(64));
+    planets.push(p);
+  }
+
+  for(let i = 0; i < 10000; i++){
+    stars.push({
+      x: Math.floor(Math.random()*(6000)), 
+      y: Math.floor(Math.random()*(6000)),
+      c: Math.floor(Math.random()*(5))+18
+    });
+  }
+  for(let i = 0; i < 50000; i++){
+    stars.push({
+      x: Math.floor(Math.random()*(6000)), 
+      y: Math.floor(Math.random()*(6000)),
+      c: Math.floor(Math.random()*(3))
+    });
+  }
+
   planets.push(new Planet(mw-70, mh, 40, 53));
   planets.push(new Planet(mw+100, mh, 70, 54));
+
+  for(let i = 0; i < 100; i++){
+    artifacts.push(new Artifact(
+      Math.floor(Math.random()*(6000)), 
+      Math.floor(Math.random()*(6000)),
+      Math.floor(Math.random()*(20)),
+      Math.floor(Math.random()*(63))
+    ));
+  }
+    
+
 }
 
 function initAudio(){
@@ -92,21 +136,34 @@ function initAudio(){
 */
 function updateGame(){
   t+=1;
-  
+  view.x = p.x - mw;
+  view.y = p.y - mh;
   splodes.forEach(e=>e.update());
   planets.forEach(e=>e.update());
+  artifacts.forEach(e=>e.update());
   p.update();
   pruneDead(splodes);
+  pruneDead(artifacts);
+  
 }
 
 function drawGame(){
   r.clear(0, r.SCREEN);
   r.renderTarget = r.SCREEN;
   
+  stars.forEach(function(e){
+    if(inView(e)){
+      r.pset(e.x - view.x, e.y-view.y, e.c);
+    }
+  });
+
   planets.forEach(e=>e.draw());
   splodes.forEach(e=>e.draw());
+  artifacts.forEach(e=>e.draw());
   
   p.draw();
+
+  drawCollected();
 
   r.render();
 
@@ -175,6 +232,18 @@ function pruneDead(entitiesArray){
     }
   }
 }
+
+function drawCollected(){
+  collected.forEach(function(d, i, a){
+    r.rect(5+i*20, h-20, 10, 10, 22);
+    r.fillRect(5+i*20, h-20, 10, 10, d.color);
+  });
+}
+
+
+
+
+
 
 
 function gameloop(){

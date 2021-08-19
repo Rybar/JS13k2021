@@ -6,6 +6,13 @@ export function choice(values) {
   return values[rand(0, values.length - 1)];
 };
 
+export function inView(o, padding=0){
+  return o.x - view.x + padding > 0 &&
+         o.y - view.y + padding > 0 &&
+         o.x - view.x - padding < w &&
+         o.y - view.y - padding < h
+}
+
 export function playSound(buffer, playbackRate = 1, pan = 0, volume = .5, loop = false) {
 
   var source = window.audioCtx.createBufferSource();

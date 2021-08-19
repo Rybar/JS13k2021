@@ -1,4 +1,5 @@
 import Splode from './splode.js';
+import { inView } from './utils.js';
 
 function Planet(x,y, radius, color){
     this.x = x;
@@ -10,22 +11,29 @@ function Planet(x,y, radius, color){
     return this;
 }
 Planet.prototype.draw = function(){
-    r.fillCircle(this.x, this.y, this.radius, this.color);
-    r.circle(this.x, this.y, this.field, 1);
+    
+    if(inView(this, 200)){
+    r.fillCircle(this.x - view.x, this.y - view.y, this.radius, this.color);
+    r.circle(this.x - view.x, this.y - view.y, this.field, 1);
+    }
 }
 Planet.prototype.update = function(){
-    let distx = this.x - p.x;
-    let disty = this.y - p.y;
 
-    let dist = Math.sqrt(distx*distx + disty*disty);
-    if( dist <= this.field + p.radius ){
+    if(inView(this, 200)){
 
-        if(!p.withinPlanetGravity){
-            p.onPlanet(this);
-        }   
+        let distx = this.x - p.x;
+        let disty = this.y - p.y;
 
+        let dist = Math.sqrt(distx*distx + disty*disty);
+        if( dist <= this.field + p.radius ){
+
+            if(!p.withinPlanetGravity){
+                p.onPlanet(this);
+            }   
+
+        }
     }
-    
+        
     
 }
 

@@ -32,13 +32,20 @@ Player = {
 
 
     draw: function(){
-        r.fillCircle(this.x, this.y, this.radius, this.color);
+        r.fillCircle(this.x - view.x, this.y - view.y, this.radius, this.color);
         r.pset(
-            this.x + Math.cos(this.angle) * (this.radius + 2),
-            this.y + Math.sin(this.angle) * (this.radius + 2),
+            this.x - view.x + Math.cos(this.angle) * (this.radius + 2),
+            this.y - view.y + Math.sin(this.angle) * (this.radius + 2),
             22);
-        debugTxt = `${this.withinPlanetGravity}\nXV ${this.xVel}\nYV ${this.yVel}\nJS ${this.jumpSpeed}`.toUpperCase();
-        r.text([debugTxt, 5, 5, 1, 3, 'left', 'top', 1, 22]);
+debugTxt = 
+`${this.withinPlanetGravity}\n
+XV ${this.xVel}\n
+YV ${this.yVel}\n
+JS ${this.jumpSpeed}\n
+VX ${view.x} VY ${view.y}\n
+`.toUpperCase();
+
+        r.text([debugTxt, 5, 5, 1, 1, 'left', 'top', 1, 22]);
     },
 
     update: function(){
