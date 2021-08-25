@@ -1,5 +1,5 @@
 import Splode from "./splode";
-import { Key } from "./utils";
+import { Key, choice } from "./utils";
 
 /*
 TODO: implement double jump or thrust after jump to escape from gravity
@@ -20,6 +20,7 @@ Player = {
     py: 0,
     px: 0,
     angle: 0,
+    bodyAngle: 0,
     planetAngle: 0,
     runSpeed: 0.9,
     turnSpeed: 0.1,
@@ -32,25 +33,44 @@ Player = {
 
 
     draw: function(){
-        r.fillCircle(this.x - view.x, this.y - view.y, this.radius, this.color);
-        r.pset(
-            this.x - view.x + Math.cos(this.angle) * (this.radius + 2),
-            this.y - view.y + Math.sin(this.angle) * (this.radius + 2),
-            22);
+        let sx = this.x - view.x,
+            sy = this.y - view.y,
+            div12 = Math.PI/6,
+            forwardX = sx + Math.cos(this.angle) * (this.radius + 2),
+            forwardy = sy + Math.sin(this.angle) * (this.radius + 2),
+            forwardXend = sx + Math.cos(this.angle) * (this.radius + 7),
+            forwardyend = sy + Math.sin(this.angle) * (this.radius + 7),
+            headx = sx + Math.cos(this.bodyAngle) * (this.radius),
+            heady = sy + Math.sin(this.bodyAngle) * (this.radius),
+            foot1x = sx + Math.cos(this.bodyAngle + div12*5 ) * (this.radius),
+            foot1y = sy + Math.sin(this.bodyAngle + div12*5 ) * (this.radius),
+            foot2x = sx + Math.cos(this.bodyAngle - div12*5 ) * (this.radius),
+            foot2y = sy + Math.sin(this.bodyAngle - div12*5 ) * (this.radius);
+
+        r.circle(sx, sy, this.radius, 1); //collide circle
+        r.line(forwardX, forwardy, forwardXend, forwardyend, 7); //forward line
+
+        r.fillCircle(headx, heady, 2, 22); //head
+        r.pset(foot1x, foot1y, 22); //foot1
+        r.pset(foot2x, foot2y, 22); //foot2
+
+
+
 debugTxt = 
-`${this.withinPlanetGravity}\n
-XV ${this.xVel}\n
-YV ${this.yVel}\n
-JS ${this.jumpSpeed}\n
-VX ${view.x} VY ${view.y}\n
-`.toUpperCase();
+// `${this.withinPlanetGravity}\n
+// XV ${this.xVel}\n
+// YV ${this.yVel}\n
+`JS ${this.jumpSpeed}\n`
+//VX ${view.x} VY ${view.y}\n
+.toUpperCase();
 
         r.text([debugTxt, 5, 5, 1, 1, 'left', 'top', 1, 22]);
-    },
+     },
 
     update: function(){
         this.y += this.yVel;
         this.x += this.xVel;
+        this.bodyAngle = this.angle - Math.PI/2;
 
         if(this.hitPlanet){
             splodes.push(new Splode(this.x, this.y, 40, 7));
@@ -85,6 +105,7 @@ VX ${view.x} VY ${view.y}\n
             this.color = 7;
             this.yVel = 0;
             this.xVel = 0;
+            this.bodyAngle = this.planetAngle;
         }
         else{
             this.color = 4;
@@ -132,6 +153,13 @@ VX ${view.x} VY ${view.y}\n
         }else{
             this.xVel += Math.cos(this.angle) * this.thrust;
             this.yVel += Math.sin(this.angle) * this.thrust;
+            let sx = this.x + Math.cos(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2,
+                sy = this.y + Math.sin(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2;
+        
+            splodes.push(
+                new Splode(this.x + Math.cos(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2,
+                           this.y + Math.sin(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2,
+                            20, choice([7,8,22]) ) );
         }
     },
 

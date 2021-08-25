@@ -11,8 +11,9 @@ import Artifact from './artifact.js';
 //stats = new Stats();
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
-w = Math.floor(innerWidth/3);
-h = Math.floor(innerHeight/3);
+
+w = Math.floor(innerWidth/4);
+h = Math.floor(innerHeight/4);
 view = {
   x: 0,
   y: 0,
@@ -25,11 +26,30 @@ paused = false;
 
 p = Player;
 p.x = 3000; p.y = 3000;
+const atlasURL = 'DATAURL:src/img/palette.webp';
+atlasImage = new Image();
+atlasImage.src = atlasURL;
 
-r = new RetroBuffer(w,h,3);
-window.playSound = playSound;
-gamebox = document.getElementById("game");
-gamebox.appendChild(r.c);
+atlasImage.onload = function(){ 
+  let c = document.createElement('canvas');
+  c.width = 64;
+  c.height = 64;
+  let ctx = c.getContext('2d');
+  ctx.drawImage(this, 0, 0);
+  atlas = new Uint32Array( ctx.getImageData(0,0,64, 64).data.buffer );
+  console.log(atlas);
+  window.r = new RetroBuffer(w, h, atlas, 10);
+  console.log(window.r);
+  gameInit();
+};
+
+function gameInit(){
+  window.playSound = playSound;
+  gamebox = document.getElementById("game");
+  gamebox.appendChild(r.c);
+  gameloop();
+}
+
 //document.body.appendChild( stats.dom );
 
 window.t = 1;
@@ -38,6 +58,7 @@ planets = [];
 sndData = [];
 stars = [];
 collected = [];
+
 artifacts = [];
 
 sounds = {};
@@ -47,14 +68,16 @@ audioTxt = "";
 debugText = "";
 
 function initGameData(){
-  for(let i = 0; i < 150; i++){
+  for(let i = 0; i < 170; i++){
     let p = new Planet();
     p.x = Math.floor(Math.random()*(6000));
     p.y = Math.floor(Math.random()*(6000));
-    p.radius = Math.floor(Math.random()*(100))+20;
+    p.radius = Math.floor(Math.random()*( (h-15)/2 ))+10;
     p.field = p.radius + Math.floor(Math.random()*(20)) + 30;
-    p.color = Math.floor(Math.random()*(64));
+    let c = Math.floor(Math.random()*(55));
+    p.color = c;
     planets.push(p);
+    //console.log(p);
   }
 
   for(let i = 0; i < 10000; i++){
@@ -72,8 +95,6 @@ function initGameData(){
     });
   }
 
-  planets.push(new Planet(mw-70, mh, 40, 53));
-  planets.push(new Planet(mw+100, mh, 70, 54));
 
   for(let i = 0; i < 100; i++){
     artifacts.push(new Artifact(
@@ -83,7 +104,25 @@ function initGameData(){
       Math.floor(Math.random()*(63))
     ));
   }
-    
+  //populate buffer with something to fill planets with
+  r.renderTarget = r.PAGE_2;
+  r.pal = r.palDefault;
+  r.fillRect(0,0,w,h,1);
+  
+ 
+  for(let i = 0; i < 5000; i++){
+    r.pat = r.dither[(Math.floor(Math.random()*(15)))];
+    r.fillCircle(Math.random()*(w), Math.random()*(h), Math.random()*(4), Math.floor(Math.random()*(5)));
+  }
+  for(let i = 0; i < 500; i++){
+    r.pat = r.dither[(Math.floor(Math.random()*(15)))];
+    r.fillCircle(Math.random()*(w), Math.random()*(h), Math.random()*(20), Math.floor(Math.random()*(7)));
+   
+  }
+  r.pat = r.dither[0];
+  r.line(mw, mh-10, mw, mh+10, 0);
+  r.line(mw-10, mh, mw+10, mh, 0);
+  r.renderTarget = r.SCREEN;
 
 }
 
@@ -148,8 +187,9 @@ function updateGame(){
 }
 
 function drawGame(){
-  r.clear(0, r.SCREEN);
-  r.renderTarget = r.SCREEN;
+  
+  r.clear(0, r.PAGE_1);
+  r.renderTarget = r.PAGE_1;
   
   stars.forEach(function(e){
     if(inView(e)){
@@ -157,20 +197,28 @@ function drawGame(){
     }
   });
 
-  planets.forEach(e=>e.draw());
+  planets.forEach(e=>{
+    //r.pal = e.palette;
+    e.draw()
+    //r.pal = r.palDefault;
+  });
   splodes.forEach(e=>e.draw());
   artifacts.forEach(e=>e.draw());
   
   p.draw();
 
   drawCollected();
-
+  r.renderSource = r.PAGE_1;
+  r.renderTarget = r.SCREEN;
+  r.sspr(0,0,w,h,0,0,w,h,false,false);
   r.render();
 
 }
 
 function titlescreen(){
-  r.clear(0,r.SCREEN);
+  r.clear(0, r.PAGE_1);
+  r.renderTarget = r.PAGE_1;
+
   splodes.forEach(splode=>{splode.draw()})
   //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
   r.text(["UNTITLED SPACE GAME", w/2-2, 50, 1, 3, 'center', 'top', 3, 7]);
@@ -184,6 +232,7 @@ function titlescreen(){
       gamestate = 1;
     }
   }; 
+
   if(soundsReady == totalSounds){
     audioTxt="ALL SOUNDS LOADED.\nCLICK OR PRESS UP/W/Z TO CONTINUE";
   } else if (soundsReady > 0){
@@ -191,6 +240,9 @@ function titlescreen(){
   } else {
     audioTxt = "CLICK TO INITIALIZE\nLOADING SEQUENCE";
   }
+  r.renderSource = r.PAGE_1;
+  r.renderTarget = r.SCREEN;
+  r.sspr(0,0,w,h,0,0,w,h,false,false);
   r.render();
 }
 
@@ -267,5 +319,4 @@ function gameloop(){
   }
 }
 
-gameloop();
 

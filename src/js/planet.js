@@ -1,21 +1,23 @@
 import Splode from './splode.js';
 import { inView } from './utils.js';
 
-function Planet(x,y, radius, color){
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
+function Planet(){
+    this.x = 0;
+    this.y = 0;
+    this.radius = 5;
     this.field = this.radius + 30;
-    this.color = color;
+    this.color = 22;
+    this.palette = [0,1,2,3,4,5,6]
     this.gravity = 0.1;
     return this;
 }
 Planet.prototype.draw = function(){
-    
+   r.renderSource = r.PAGE_2;
     if(inView(this, 200)){
-    r.fillCircle(this.x - view.x, this.y - view.y, this.radius, this.color);
-    r.circle(this.x - view.x, this.y - view.y, this.field, 1);
+        r.tfillCircle(this.x - view.x, this.y - view.y, this.radius, this.color);
+        r.circle(this.x - view.x, this.y - view.y, this.field, 1);
     }
+    
 }
 Planet.prototype.update = function(){
 

@@ -25,7 +25,7 @@ export const dataurl = () => ({
         // replace the placeholder by a base64 encoded dataurl of the image
         transformedCode = transformedCode.replace(
           ` ${variable} = 'DATAURL:${imageFilePath}'`,
-          ` ${variable} = 'data:image/png;base64,${data.toString('base64')}'`
+          ` ${variable} = 'data:image/webp;base64,${data.toString('base64')}'`
         );
       });
 

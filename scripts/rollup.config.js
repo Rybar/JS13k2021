@@ -31,8 +31,8 @@ export default {
         compress: {
           keep_fargs: false,
           passes: 4,
-          //pure_funcs: ['assert', 'debug'],
-          //pure_getters: true,
+          pure_funcs: ['assert', 'debug'],
+          pure_getters: true,
           unsafe: true,
           unsafe_arrows: true,
           unsafe_comps: true,
