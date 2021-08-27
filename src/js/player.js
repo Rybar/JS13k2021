@@ -30,6 +30,7 @@ Player = {
     thrust: 0.02,
     yVel: 0,
     xVel: 0,
+    fuel: 100,
     
 
 

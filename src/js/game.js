@@ -7,6 +7,7 @@ import { playSound, Key, choice, inView } from './utils.js';
 import Player from './player.js';
 import Planet from './planet.js';
 import Artifact from './artifact.js';
+import Fuel from './fuel.js';
 
 //stats = new Stats();
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -85,6 +86,7 @@ window.t = 1;
 splodes = [];
 planets = [];
 sndData = [];
+Fuelrocks = [];
 stars = [];
 collected = [];
 
@@ -98,12 +100,17 @@ debugText = "";
 darkness = 0; 
 
 function initGameData(){
-  for(let i = 0; i < 500; i++){
+
+  for(let i = 0; i < 1000; i++){
+    Fuelrocks.push(new Fuel(Math.random()*12000, Math.random()*12000, Math.random()*10));
+  }
+
+  for(let i = 0; i < 300; i++){
     let p = new Planet();
     p.x = Math.floor(Math.random()*(12000));
     p.y = Math.floor(Math.random()*(12000));
-    p.radius = Math.floor(Math.random()*( (h-25)/2 ))+10;
-    p.field = p.radius + Math.floor(Math.random()*(20)) + 30;
+    p.radius = Math.floor(Math.random()*( (h-25)/2 ))+20;
+    p.field = p.radius + Math.floor(Math.random()*(20)+10);
     let c = Math.floor(Math.random()*(55));
     p.color = c;
     planets.push(p);
@@ -112,15 +119,15 @@ function initGameData(){
 
   for(let i = 0; i < 10000; i++){
     stars.push({
-      x: Math.floor(Math.random()*(6000)), 
-      y: Math.floor(Math.random()*(6000)),
+      x: Math.floor(Math.random()*(12000)), 
+      y: Math.floor(Math.random()*(12000)),
       c: Math.floor(Math.random()*(5))+18
     });
   }
   for(let i = 0; i < 50000; i++){
     stars.push({
-      x: Math.floor(Math.random()*(6000)), 
-      y: Math.floor(Math.random()*(6000)),
+      x: Math.floor(Math.random()*(12000)), 
+      y: Math.floor(Math.random()*(12000)),
       c: Math.floor(Math.random()*(3))
     });
   }
@@ -149,9 +156,18 @@ function initGameData(){
     r.fillCircle(Math.random()*(w), Math.random()*(h), Math.random()*(20), Math.floor(Math.random()*(7)));
    
   }
+  
+  let i = 50000;
+  
+  r.pat = r.dither[8];
+  while(i--){
+    r.renderTarget = r.PAGE_2;
+    let x = Math.random()*(w);
+    let y =  Math.random()*(h);
+    let c = r.pget(x,y, r.PAGE_2);
+    r.line(x, y, x+Math.random()*10, y+4, c);
+  }
   r.pat = r.dither[0];
-  r.line(mw, mh-10, mw, mh+10, 0);
-  r.line(mw-10, mh, mw+10, mh, 0);
   r.renderTarget = r.SCREEN;
 
 }
@@ -207,12 +223,14 @@ function updateGame(){
   t+=1;
   view.x = p.x - mw;
   view.y = p.y - mh;
+  Fuelrocks.forEach(e=>e.update());
   splodes.forEach(e=>e.update());
   planets.forEach(e=>e.update());
   artifacts.forEach(e=>e.update());
   p.update();
   pruneDead(splodes);
   pruneDead(artifacts);
+  pruneDead(Fuelrocks);
   
 }
 
@@ -226,12 +244,8 @@ function drawGame(){
       r.pset(e.x - view.x, e.y-view.y, e.c);
     }
   });
-
-  planets.forEach(e=>{
-    //r.pal = e.palette;
-    e.draw()
-    //r.pal = r.palDefault;
-  });
+  Fuelrocks.forEach(e=>e.draw());
+  planets.forEach(e=>e.draw());
   splodes.forEach(e=>e.draw());
   artifacts.forEach(e=>e.draw());
   

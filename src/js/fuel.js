@@ -1,58 +1,59 @@
 import { inView } from './utils.js';
 import Splode from './splode.js';
 
-function Artifact(x,y, radius, color){
+function Fuel(x,y, radius){
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.alive = true;
+    this.alive = true
+    this.reaching = false;
     
-    this.color = color;
-    this.drawStack = [];
-
-    //cache this in r.Spritesheet page
-    for(let i = 0; i < 20; i++){
-       this.drawStack.push({
-           x: this.x + (Math.random()*2-1) * this.radius,
-           y: this.y + (Math.random()*2-1) * this.radius,
-           w: Math.random() * this.radius,
-           h: Math.random() * this.radius,
-           color: this.color + Math.random()*3
-       })
-    }
 
     return this;
 }
-Artifact.prototype.draw = function(){
+Fuel.prototype.draw = function(){
     
-    if(inView(this, 200)){
-        this.drawStack.forEach(function(d){
-            
-            r.fillRect(d.x-view.x, d.y-view.y, d.w, d.h, d.color);
-        })
+    if(inView(this, 10)){
+        r.pat = r.dither[Math.random() < -0.5 ? 8 : 9];
+        r.fillCircle(this.x- view.x, this.y-view.y, this.radius+5, 14);
+        r.pat = r.dither[0];
+        r.fillCircle(this.x-view.x, this.y-view.y, this.radius, 11);
+        if(this.reaching){
+            let i = 10;
+            while(i--){
+                r.pat = r.dither[i];
+            r.line(this.x - view.x + (Math.random()-0.5) * this.radius*2,
+                    this.y - view.y + (Math.random()-0.5) * this.radius*2,
+                        p.x - view.x,
+                        p.y - view.y,
+                        10+Math.random()*5);
+            }
+        }
     }
 }
-Artifact.prototype.update = function(){
-
-    if(inView(this, 200)){
+Fuel.prototype.update = function(){
+    
+    if(inView(this, 10)){
 
         let distx = this.x - p.x;
         let disty = this.y - p.y;
 
-        let dist = Math.sqrt(distx*distx + disty*disty);
-        if( dist <= this.radius + p.radius ){
+        this.dist = Math.sqrt(distx*distx + disty*disty);
+        if( this.dist <= this.radius + p.radius + 40 ){
 
-            this.alive = false;
-            for(let i = 10; i > 0; i--){
-                splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
-            }
-            playSound(sounds.cellComplete)
-            collected.push(this);
+            this.radius -= 0.1;
+            p.fuel += 0.1;
+            this.reaching = true;
+            
+        }else {this.reaching = false;}
 
-        }
+    }
+    
+    if(this.radius <= 0){
+        this.alive = false;
     }
         
     
 }
 
-export default Artifact;
+export default Fuel;

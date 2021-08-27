@@ -14,7 +14,18 @@ function Planet(){
 Planet.prototype.draw = function(){
    r.renderSource = r.PAGE_2;
     if(inView(this, 200)){
+        r.pat = r.dither[15];
+        r.fillCircle(this.x - view.x, this.y - view.y, this.radius+30, 17);
+        r.pat = r.dither[13];
+        r.fillCircle(this.x - view.x, this.y - view.y, this.radius+20, 17);
+        r.pat = r.dither[11];
+        r.fillCircle(this.x - view.x, this.y - view.y, this.radius+8, 17);
+        r.pat = r.dither[8];
+        r.fillCircle(this.x - view.x, this.y - view.y, this.radius+3, 17);
+        r.fillCircle(this.x - view.x, this.y - view.y, this.radius+2, 18);
+        r.pat = r.dither[0];
         r.tfillCircle(this.x - view.x, this.y - view.y, this.radius, this.color);
+        r.circle(this.x - view.x, this.y - view.y, this.radius, 19);
         r.circle(this.x - view.x, this.y - view.y, this.field, 1);
     }
     
