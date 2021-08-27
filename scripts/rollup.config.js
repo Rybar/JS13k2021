@@ -1,23 +1,30 @@
 import { terser } from 'rollup-plugin-terser';
 import { dataurl } from './rollup-plugin-dataurl';
-
+import { roadrolled } from './rollup-plugin-roadroller';
 
 const { DEBUG = false, MINIFY = false } = process.env
 
 export default {
   // bundle all imported modules together, discarding unused code
   input: './src/js/game.js',
+    onwarn(warning, warn) {
+      // suppress eval warnings
+      if (warning.code === 'EVAL') return
+      if (warning.code === 'SOURCEMAP_ERROR') return
+      warn(warning)
+    },
   output: {
-    file: './dist/game.js',
+    file: './dist/game-rollup.js',
     // wrap global variables/functions into in IIFE so terser will rename them
     format: 'iife',
     freeze: DEBUG,
     indent: DEBUG ? '  ' : false,
     preferConst: true,
     // generate sourcemaps (development mode only)
-    sourcemap: DEBUG,
+    //sourcemap: DEBUG,
     // allow the use of onresize=onrotate=... and other space saver hacks
     strict: false,
+    useStrict: false,
   },
   plugins: [
     // embed images into source files as data URI

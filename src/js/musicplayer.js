@@ -23,7 +23,7 @@
 *
 */
 
-"use strict";
+//"use strict";
 
 // Some general notes and recommendations:
 //  * This code uses modern ECMAScript features, such as ** instead of

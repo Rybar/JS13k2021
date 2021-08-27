@@ -12,6 +12,35 @@ import Artifact from './artifact.js';
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
 
+/*
+Interstellar Planet Pollinator
+collect resources to turn into planet food. 
+Press down to pollinate the planet. 360 around the planet gets bonus points.
+planets will have a different number of sectors to be pollinated depending on circumference.
+planet object will track sector pollination status
+pollinated: complete
+overpollinated: will damage harvest bots as they walk over
+
+ability to escape planets gravity depends on how much planet food you're carrying. emptier tank = higher jump.
+
+harvest bots are obstacles walking each planet disable them by overpollinating the surface they walk on.
+the overgrowth will drain them and then consume their bodies
+they will do damage if you touch them.
+
+Greeble Artifacts
+give bonuses
+bonuses:
+increased fuel capacity
+increased jump strength (threshold is relative much food you have)
+
+no shooting! (unless it becomes apparent after implementation of mechanics that its not fun)
+fuel is auto-collected by proxixmity. 
+fuel chunk asteroids will shrink as you consume them.
+
+
+*/
+
+
 w = Math.floor(innerWidth/4);
 h = Math.floor(innerHeight/4);
 view = {
@@ -66,13 +95,14 @@ soundsReady = 0;
 totalSounds = 2;
 audioTxt = "";
 debugText = "";
+darkness = 0; 
 
 function initGameData(){
-  for(let i = 0; i < 170; i++){
+  for(let i = 0; i < 500; i++){
     let p = new Planet();
-    p.x = Math.floor(Math.random()*(6000));
-    p.y = Math.floor(Math.random()*(6000));
-    p.radius = Math.floor(Math.random()*( (h-15)/2 ))+10;
+    p.x = Math.floor(Math.random()*(12000));
+    p.y = Math.floor(Math.random()*(12000));
+    p.radius = Math.floor(Math.random()*( (h-25)/2 ))+10;
     p.field = p.radius + Math.floor(Math.random()*(20)) + 30;
     let c = Math.floor(Math.random()*(55));
     p.color = c;
@@ -187,7 +217,7 @@ function updateGame(){
 }
 
 function drawGame(){
-  
+  r.pal = r.brightness.slice(64*darkness, 64*darkness + 64);
   r.clear(0, r.PAGE_1);
   r.renderTarget = r.PAGE_1;
   

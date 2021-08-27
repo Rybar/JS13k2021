@@ -1,3 +1,4 @@
+import { removeAllListeners } from "npm";
 import Splode from "./splode";
 import { Key, choice } from "./utils";
 
@@ -42,10 +43,16 @@ Player = {
             forwardyend = sy + Math.sin(this.angle) * (this.radius + 7),
             headx = sx + Math.cos(this.bodyAngle) * (this.radius),
             heady = sy + Math.sin(this.bodyAngle) * (this.radius),
+            neckx = sx + Math.cos(this.bodyAngle) * (this.radius/2),
+            necky = sy + Math.sin(this.bodyAngle) * (this.radius/2),
             foot1x = sx + Math.cos(this.bodyAngle + div12*5 ) * (this.radius),
             foot1y = sy + Math.sin(this.bodyAngle + div12*5 ) * (this.radius),
             foot2x = sx + Math.cos(this.bodyAngle - div12*5 ) * (this.radius),
-            foot2y = sy + Math.sin(this.bodyAngle - div12*5 ) * (this.radius);
+            foot2y = sy + Math.sin(this.bodyAngle - div12*5 ) * (this.radius),
+            arm1x = sx + Math.cos(this.bodyAngle + div12*2 ) * (this.radius),
+            arm1y = sy + Math.sin(this.bodyAngle + div12*2 ) * (this.radius),
+            arm2x = sx + Math.cos(this.bodyAngle - div12*2 ) * (this.radius),
+            arm2y = sy + Math.sin(this.bodyAngle - div12*2 ) * (this.radius);
 
         r.circle(sx, sy, this.radius, 1); //collide circle
         r.line(forwardX, forwardy, forwardXend, forwardyend, 7); //forward line
@@ -53,6 +60,11 @@ Player = {
         r.fillCircle(headx, heady, 2, 22); //head
         r.pset(foot1x, foot1y, 22); //foot1
         r.pset(foot2x, foot2y, 22); //foot2
+        r.line(sx, sy, headx, heady, 22); //torso/neck line
+        r.line(sx, sy, foot1x, foot1y, 22); //leg1
+        r.line(sx, sy, foot2x, foot2y, 22); //leg2
+        r.line(neckx, necky, arm1x, arm1y, 22); //arm1
+        r.line(neckx, necky, arm2x, arm2y, 22); //arm2
 
 
 
@@ -122,6 +134,8 @@ debugTxt =
             splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
             }
             playSound(sounds.cellComplete)
+            darkness = (window.darkness++)%6;
+            console.log(darkness);
         }
         
 

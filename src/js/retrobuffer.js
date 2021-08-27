@@ -80,6 +80,15 @@ var RetroBuffer = function(width, height, atlas, pages){
     this.buf8 =            new Uint8Array(this.buf),
     this.data =            new Uint32Array(this.buf),
     this.ram =             new Uint8Array(this.WIDTH * this.HEIGHT * this.PAGES);
+
+    //Brightness LUT
+    this.brightness = [];
+    for(let i = 0; i < 6; i++){
+      for(let j = 0; j < 64; j++){
+        this.brightness[i*64+j] = this.colors.indexOf(this.atlas[i*64+j]);
+      }
+      //ram[address + i] = colors.indexOf(data[i]);
+    }
   
     
   
