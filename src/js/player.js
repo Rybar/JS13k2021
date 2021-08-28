@@ -1,4 +1,3 @@
-import { removeAllListeners } from "npm";
 import Splode from "./splode";
 import { Key, choice } from "./utils";
 
@@ -23,11 +22,11 @@ Player = {
     angle: 0,
     bodyAngle: 0,
     planetAngle: 0,
-    runSpeed: 0.9,
+    runSpeed: 2.5,
     turnSpeed: 0.1,
     baseJumpSpeed: 2,
-    jumpSpeed: 2,
-    thrust: 0.02,
+    jumpSpeed: 2.2,
+    thrust: 0.04,
     yVel: 0,
     xVel: 0,
     fuel: 100,
@@ -181,7 +180,7 @@ debugTxt =
     moveDown: function(){
         if(this.colliding){
             //this.chargingJump = true
-            this.jumpSpeed += 0.01;
+            //this.jumpSpeed += 0.01;
         }else{
             this.xVel -= Math.cos(this.angle) * this.thrust;
             this.yVel -= Math.sin(this.angle) * this.thrust;

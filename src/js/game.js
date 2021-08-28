@@ -87,6 +87,7 @@ splodes = [];
 planets = [];
 sndData = [];
 Fuelrocks = [];
+planetSectors = [];
 stars = [];
 collected = [];
 
@@ -110,7 +111,7 @@ function initGameData(){
     p.x = Math.floor(Math.random()*(12000));
     p.y = Math.floor(Math.random()*(12000));
     p.radius = Math.floor(Math.random()*( (h-25)/2 ))+20;
-    p.field = p.radius + Math.floor(Math.random()*(20)+10);
+    p.field = p.radius + Math.floor(Math.random()*(20)+40);
     let c = Math.floor(Math.random()*(55));
     p.color = c;
     planets.push(p);
@@ -227,10 +228,12 @@ function updateGame(){
   splodes.forEach(e=>e.update());
   planets.forEach(e=>e.update());
   artifacts.forEach(e=>e.update());
+  planetSectors.forEach(e=>e.update());
   p.update();
   pruneDead(splodes);
   pruneDead(artifacts);
   pruneDead(Fuelrocks);
+  pruneDead(planetSectors);
   
 }
 
@@ -245,6 +248,7 @@ function drawGame(){
     }
   });
   Fuelrocks.forEach(e=>e.draw());
+  planetSectors.forEach(e=>e.draw());
   planets.forEach(e=>e.draw());
   splodes.forEach(e=>e.draw());
   artifacts.forEach(e=>e.draw());
@@ -265,8 +269,8 @@ function titlescreen(){
 
   splodes.forEach(splode=>{splode.draw()})
   //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
-  r.text(["UNTITLED SPACE GAME", w/2-2, 50, 1, 3, 'center', 'top', 3, 7]);
-  r.text([audioTxt, w/2-2, 90, 1, 3, 'center', 'top', 1, 22]);
+  r.text(["INTERSTELLAR\nPLANET POLLINATOR", w/2-2, 50, 3, 5, 'center', 'top', 3, 19]);
+  r.text([audioTxt, w/2-2, 100, 1, 3, 'center', 'top', 1, 22]);
   if(Key.justReleased(Key.UP) || Key.justReleased(Key.w) || Key.justReleased(Key.z)){
     if(soundsReady == 0){
     initGameData();
