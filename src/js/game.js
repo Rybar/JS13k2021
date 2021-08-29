@@ -111,11 +111,10 @@ function initGameData(){
     p.x = Math.floor(Math.random()*(12000));
     p.y = Math.floor(Math.random()*(12000));
     p.radius = Math.floor(Math.random()*( (h-25)/2 ))+20;
-    p.field = p.radius + Math.floor(Math.random()*(20)+40);
+    p.field = p.radius + 50;
     let c = Math.floor(Math.random()*(55));
     p.color = c;
     planets.push(p);
-    //console.log(p);
   }
 
   for(let i = 0; i < 10000; i++){

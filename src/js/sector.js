@@ -32,6 +32,7 @@ Sector.prototype.draw = function(){
             }
         }
     }
+
 }
 Sector.prototype.update = function(){
     
@@ -42,7 +43,7 @@ Sector.prototype.update = function(){
 
         let dist = Math.sqrt(distx*distx + disty*disty);
 
-        if( dist <= this.radius + p.radius + 40 ){
+        if( dist <= this.radius + p.radius + 40 && p.fuel > 0){
             if(this.radius <= this.maxRadius){
                 this.radius += 0.6;
                 p.fuel -= 0.6;
@@ -61,9 +62,11 @@ Sector.prototype.update = function(){
             }
         }
 
-    }
+        if(this.planet.sectorsRemaining == 0){
+            this.alive = false
+        }
     
-
+    }
     // if(this.radius <= 0){
     //     this.alive = false;
     // }

@@ -21,6 +21,8 @@ Player = {
     px: 0,
     angle: 0,
     bodyAngle: 0,
+    armThrust: 0,
+    legThrust: 0,
     planetAngle: 0,
     runSpeed: 2.5,
     turnSpeed: 0.1,
@@ -30,39 +32,65 @@ Player = {
     yVel: 0,
     xVel: 0,
     fuel: 100,
-    
+    div12: Math.PI/6,
+    forwardX: 0,
+    forwardy: 0,
+    forwardXend: 0,
+    forwardyend: 0,
+    headx: 0,
+    heady: 0,
+    neckx: 0,
+    necky: 0,
+    foot1x: 0,
+    foot1y: 0,
+    foot2x: 0,
+    foot2y: 0,
+    arm1x: 0,
+    arm1y: 0,
+    arm2x: 0,
+    arm2y: 0,
+
 
 
     draw: function(){
+        r.pat = r.dither[0];
+        
+
         let sx = this.x - view.x,
             sy = this.y - view.y,
-            div12 = Math.PI/6,
-            forwardX = sx + Math.cos(this.angle) * (this.radius + 2),
-            forwardy = sy + Math.sin(this.angle) * (this.radius + 2),
+            div12 = this.div12,
+        
+            forwardX = sx + Math.cos(this.angle) * (this.radius + 5),
+            forwardy = sy + Math.sin(this.angle) * (this.radius + 5),
             forwardXend = sx + Math.cos(this.angle) * (this.radius + 7),
             forwardyend = sy + Math.sin(this.angle) * (this.radius + 7),
             headx = sx + Math.cos(this.bodyAngle) * (this.radius),
             heady = sy + Math.sin(this.bodyAngle) * (this.radius),
             neckx = sx + Math.cos(this.bodyAngle) * (this.radius/2),
             necky = sy + Math.sin(this.bodyAngle) * (this.radius/2),
-            foot1x = sx + Math.cos(this.bodyAngle + div12*5 ) * (this.radius),
-            foot1y = sy + Math.sin(this.bodyAngle + div12*5 ) * (this.radius),
-            foot2x = sx + Math.cos(this.bodyAngle - div12*5 ) * (this.radius),
-            foot2y = sy + Math.sin(this.bodyAngle - div12*5 ) * (this.radius),
-            arm1x = sx + Math.cos(this.bodyAngle + div12*2 ) * (this.radius),
-            arm1y = sy + Math.sin(this.bodyAngle + div12*2 ) * (this.radius),
-            arm2x = sx + Math.cos(this.bodyAngle - div12*2 ) * (this.radius),
-            arm2y = sy + Math.sin(this.bodyAngle - div12*2 ) * (this.radius);
+            
+            
+            arm1x = neckx + Math.cos(this.bodyAngle + div12*3.5+this.armThrust ) * (this.radius),
+            arm1y = necky + Math.sin(this.bodyAngle + div12*3.5+this.armThrust ) * (this.radius),
+            arm2x = neckx + Math.cos(this.bodyAngle - div12*3.5-this.armThrust ) * (this.radius),
+            arm2y = necky + Math.sin(this.bodyAngle - div12*3.5-this.armThrust ) * (this.radius);
+
+            this.foot1x = foot1x = sx + Math.cos(this.bodyAngle + div12*5+this.legThrust ) * (this.radius),
+            this.foot1y = foot1y = sy + Math.sin(this.bodyAngle + div12*5+this.legThrust ) * (this.radius),
+            this.foot2x = foot2x = sx + Math.cos(this.bodyAngle - div12*5-this.legThrust ) * (this.radius),
+            this.foot2y = foot2y = sy + Math.sin(this.bodyAngle - div12*5-this.legThrust ) * (this.radius),
 
         r.circle(sx, sy, this.radius, 1); //collide circle
         r.line(forwardX, forwardy, forwardXend, forwardyend, 7); //forward line
 
         r.fillCircle(headx, heady, 2, 22); //head
-        r.pset(foot1x, foot1y, 22); //foot1
-        r.pset(foot2x, foot2y, 22); //foot2
+        r.circle(foot1x, foot1y, 1, 22); //foot1
+        r.circle(foot2x, foot2y, 1, 22); //foot2
         r.line(sx, sy, headx, heady, 22); //torso/neck line
         r.line(sx, sy, foot1x, foot1y, 22); //leg1
         r.line(sx, sy, foot2x, foot2y, 22); //leg2
+        r.line(sx, sy, foot1x, foot1y, 22); //leg1
+        r.line(sx, sy, foot2x, foot2y, 22); //leg2r.line(sx, sy, headx, heady, 22); //torso/neck line
         r.line(neckx, necky, arm1x, arm1y, 22); //arm1
         r.line(neckx, necky, arm2x, arm2y, 22); //arm2
 
@@ -72,7 +100,9 @@ debugTxt =
 // `${this.withinPlanetGravity}\n
 // XV ${this.xVel}\n
 // YV ${this.yVel}\n
-`JS ${this.jumpSpeed}\n`
+`JS ${this.jumpSpeed}\n
+FUEL: ${this.fuel}\n
+ARM: ${this.armThrust}\n`
 //VX ${view.x} VY ${view.y}\n
 .toUpperCase();
 
@@ -82,11 +112,16 @@ debugTxt =
     update: function(){
         this.y += this.yVel;
         this.x += this.xVel;
-        this.bodyAngle = this.angle - Math.PI/2;
+        this.bodyAngle = this.angle// - Math.PI/2;
+        
+        let velAngle = Math.atan2(this.yVel, this.xVel);
 
-        if(this.hitPlanet){
-            splodes.push(new Splode(this.x, this.y, 40, 7));
-            this.hitPlanet = false;
+        this.armThrust = this.legThrust =  Math.cos(this.bodyAngle - velAngle);
+
+        
+
+        if(this.fuel < 0){
+            this.fuel = 0;
         }
 
         if(this.planet){
@@ -95,19 +130,20 @@ debugTxt =
             let dist = Math.sqrt(distx*distx + disty*disty);
             if( dist >= this.planet.radius + this.radius ){
                 this.colliding = false;
+
             }
             if( dist >= this.planet.field + this.radius ){
                 this.withinPlanetGravity = false;
             }
             if(dist <= this.planet.radius){
                 this.colliding=true;
-                
             }
             if(this.withinPlanetGravity){
                 //gravity towards planet
                 this.py = this.y - this.planet.y;
                 this.px = this.x - this.planet.x;
-                this.planetAngle = Math.atan2(this.py, this.px);   
+                this.planetAngle = Math.atan2(this.py, this.px);
+                this.bodyAngle = this.planetAngle;   
                 this.xVel -= Math.cos(this.planetAngle) * this.planet.gravity;
                 this.yVel -= Math.sin(this.planetAngle) * this.planet.gravity;
             }
@@ -117,7 +153,7 @@ debugTxt =
             this.color = 7;
             this.yVel = 0;
             this.xVel = 0;
-            this.bodyAngle = this.planetAngle;
+            
         }
         else{
             this.color = 4;
@@ -134,8 +170,7 @@ debugTxt =
             splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
             }
             playSound(sounds.cellComplete)
-            darkness = (window.darkness++)%6;
-            console.log(darkness);
+            
         }
         
 
@@ -147,6 +182,7 @@ debugTxt =
             this.yVel -= Math.sin(this.planetAngle + Math.PI/2) * this.runSpeed;
         }else{
             this.angle -= this.turnSpeed;
+            this.angle = this.angle % (Math.PI*2);
         }
     },
 
@@ -156,6 +192,7 @@ debugTxt =
             this.yVel -= Math.sin(this.planetAngle - Math.PI/2) * this.runSpeed;
         }else{
             this.angle += this.turnSpeed;
+            this.angle = this.angle % (Math.PI*2);
         }
     },
 
@@ -163,17 +200,17 @@ debugTxt =
         if(this.colliding){
             this.xVel += Math.cos(this.planetAngle) * this.jumpSpeed;
             this.yVel += Math.sin(this.planetAngle) * this.jumpSpeed;
+            
         
         }else{
             this.xVel += Math.cos(this.angle) * this.thrust;
             this.yVel += Math.sin(this.angle) * this.thrust;
-            let sx = this.x + Math.cos(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2,
-                sy = this.y + Math.sin(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2;
+            
         
-            splodes.push(
-                new Splode(this.x + Math.cos(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2,
-                           this.y + Math.sin(this.angle+Math.PI) * (this.radius + 2)+Math.random()*2,
-                            20, choice([7,8,22]) ) );
+            if(!this.withinPlanetGravity){
+                splodes.push( new Splode(this.foot1x+view.x, this.foot1y+view.y, 5, choice([7,8,22]) ) );
+                splodes.push( new Splode(this.foot2x+view.x, this.foot2y+view.y, 5, choice([7,8,22]) ) );
+             }
         }
     },
 

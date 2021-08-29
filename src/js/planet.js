@@ -46,14 +46,14 @@ Planet.prototype.draw = function(){
         r.tfillCircle(this.x - view.x, this.y - view.y, this.radius, this.drawColor);
 
         //icky gray stuff
-        r.pat = r.dither[7];
+        r.pat = r.dither[8];
         this.disease.forEach(function(d){
             r.fillCircle(d.x - view.x, d.y - view.y, d.radius, 42);
         });
 
         //a bright cyan line to finish it off --dark red if its not pollinated
         r.circle(this.x - view.x, this.y - view.y, this.radius, this.sectorsRemaining == 0 ? 19 : 4);
-        
+
         //the planet gravity field
         r.circle(this.x - view.x, this.y - view.y, this.field, 1);
 

@@ -42,7 +42,7 @@ Fuel.prototype.update = function(){
         if( this.dist <= this.radius + p.radius + 40 ){
 
             this.radius -= 0.1;
-            p.fuel += 0.1;
+            p.fuel += 1;
             this.reaching = true;
             
         }else {this.reaching = false;}

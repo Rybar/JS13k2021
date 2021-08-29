@@ -26,6 +26,7 @@ function Artifact(x,y, radius, color){
 Artifact.prototype.draw = function(){
     
     if(inView(this, 200)){
+        r.pat = r.dither[0];
         this.drawStack.forEach(function(d){
             
             r.fillRect(d.x-view.x, d.y-view.y, d.w, d.h, d.color);
