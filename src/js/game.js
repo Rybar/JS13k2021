@@ -42,8 +42,10 @@ fuel chunk asteroids will shrink as you consume them.
 */
 
 
-w = Math.floor(innerWidth/4);
-h = Math.floor(innerHeight/4);
+w = Math.floor(innerWidth/3);
+h = Math.floor(innerHeight/3);
+Ww = w * 20;
+Wh = h * 20;
 view = {
   x: 0,
   y: 0,
@@ -55,7 +57,7 @@ paused = false;
 
 
 p = Player;
-p.x = 3000; p.y = 3000;
+p.x = Ww/2; p.y = Wh/2;
 const atlasURL = 'DATAURL:src/img/palette.webp';
 atlasImage = new Image();
 atlasImage.src = atlasURL;
@@ -98,20 +100,21 @@ soundsReady = 0;
 totalSounds = 2;
 audioTxt = "";
 debugText = "";
-darkness = 0; 
+darkness = 0;
+minimapToggle = false;
 
 function initGameData(){
 
-  for(let i = 0; i < 3000; i++){
-    Fuelrocks.push(new Fuel(Math.random()*12000, Math.random()*12000, Math.random()*10));
+  for(let i = 0; i < 1000; i++){
+    Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
   }
 
-  for(let i = 0; i < 300; i++){
+  for(let i = 0; i < 50; i++){
     let p = new Planet();
-    p.x = Math.floor(Math.random()*(12000));
-    p.y = Math.floor(Math.random()*(12000));
-    p.radius = Math.floor(Math.random()*( (h-25)/2 ))+20;
-    p.field = p.radius + 50;
+    p.x = Math.floor(Math.random()*(Ww));
+    p.y = Math.floor(Math.random()*(Wh));
+    p.radius = Math.floor(Math.random()*( (h/2*.66)-20)+20); // radius of planet, no bigger than 2/3 of screen height
+    p.field = p.radius + 45;
     let c = Math.floor(Math.random()*(55));
     p.color = c;
     planets.push(p);
@@ -119,15 +122,15 @@ function initGameData(){
 
   for(let i = 0; i < 10000; i++){
     stars.push({
-      x: Math.floor(Math.random()*(12000)), 
-      y: Math.floor(Math.random()*(12000)),
+      x: Math.floor(Math.random()*(Ww)), 
+      y: Math.floor(Math.random()*(Wh)),
       c: Math.floor(Math.random()*(5))+18
     });
   }
   for(let i = 0; i < 50000; i++){
     stars.push({
-      x: Math.floor(Math.random()*(12000)), 
-      y: Math.floor(Math.random()*(12000)),
+      x: Math.floor(Math.random()*(Ww)), 
+      y: Math.floor(Math.random()*(Wh)),
       c: Math.floor(Math.random()*(3))
     });
   }
@@ -135,8 +138,8 @@ function initGameData(){
 
   for(let i = 0; i < 100; i++){
     artifacts.push(new Artifact(
-      Math.floor(Math.random()*(6000)), 
-      Math.floor(Math.random()*(6000)),
+      Math.floor(Math.random()*(Ww)), 
+      Math.floor(Math.random()*(Wh)),
       Math.floor(Math.random()*(20)),
       Math.floor(Math.random()*(63))
     ));
@@ -205,6 +208,30 @@ function initAudio(){
   })
 }
 
+function drawMiniMap(){
+  console.log('drawing minimap')
+  r.pal = r.palDefault;
+  r.fillRect(0,0,w,h,0);
+
+  planets.forEach(function(p){
+    r.fillCircle(p.x/20, p.y/20, (p.radius/20)+1, p.sectorsRemaining==0?p.color:40);
+    if(p.sectorsRemaining==0){
+      r.circle(p.x/20, p.y/20, (p.radius/20)+1, 19);
+    }
+  });
+
+  Fuelrocks.forEach(function(f){
+    r.pset(f.x/20, f.y/20, 2);
+  });p.color
+
+  r.pset(p.x/20, p.y/20, 22);
+  r.pset((p.x/20)+1, (p.y/20)+1, 22);
+  r.pset((p.x/20)-1, (p.y/20)-1, 22);
+  r.pset((p.x/20)-1, (p.y/20)+1, 22);
+  r.pset((p.x/20)+1, (p.y/20)-1, 22);
+
+}
+
 
 /*
   ______                                            ______     __                 __                         
@@ -233,6 +260,10 @@ function updateGame(){
   pruneDead(artifacts);
   pruneDead(Fuelrocks);
   pruneDead(planetSectors);
+
+  if(Key.justReleased(Key.m)){
+    minimapToggle = !minimapToggle;
+  }
   
 }
 
@@ -258,6 +289,7 @@ function drawGame(){
   r.renderSource = r.PAGE_1;
   r.renderTarget = r.SCREEN;
   r.sspr(0,0,w,h,0,0,w,h,false,false);
+  if(minimapToggle){ drawMiniMap() };
   r.render();
 
 }

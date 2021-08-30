@@ -7,7 +7,7 @@ TODO: implement double jump or thrust after jump to escape from gravity
 Player = {
     x: 0,
     y: 0,
-    radius: 8,
+    radius: 10,
     color: 4,
     colliding: false,
     withinPlanetGravity: false,

@@ -1,7 +1,7 @@
 import Splode from './splode.js';
-import { inView } from './utils.js';
+import { inView, choice} from './utils.js';
 import Sector from './sector.js';
-import Fuel from './fuel.js';
+
 
 function Planet(){
     this.x = 0;
@@ -91,11 +91,11 @@ Planet.prototype.update = function(){
             if(!this.completeFlag){
                 this.completeFlag = true;
                 this.disease = [];
-                let i = 40;
+                let i = 80;
                 while(i--){
                     let a = Math.random()*3.14159*2;
                     let r = Math.random()*this.radius;
-                    splodes.push(new Splode(this.x + r*Math.cos(a), this.y + r*Math.sin(a), 50, Math.random()*63 ) );
+                    splodes.push(new Splode(this.x + r*Math.cos(a), this.y + r*Math.sin(a), 20+Math.random()*50, choice([20,21,22]) ) );
                 }
             }
         }

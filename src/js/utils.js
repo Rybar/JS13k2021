@@ -57,6 +57,7 @@ export const Key = {
   f: 70,
   p: 80,
   r: 82,
+  m: 77,
 
   isDown(keyCode) {
       return this._pressed[keyCode];
