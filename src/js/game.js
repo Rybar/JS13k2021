@@ -102,7 +102,7 @@ darkness = 0;
 
 function initGameData(){
 
-  for(let i = 0; i < 1000; i++){
+  for(let i = 0; i < 3000; i++){
     Fuelrocks.push(new Fuel(Math.random()*12000, Math.random()*12000, Math.random()*10));
   }
 
@@ -159,7 +159,7 @@ function initGameData(){
   
   let i = 50000;
   
-  r.pat = r.dither[8];
+  r.pat = r.dither[0];
   while(i--){
     r.renderTarget = r.PAGE_2;
     let x = Math.random()*(w);
@@ -338,11 +338,6 @@ function drawCollected(){
     r.fillRect(5+i*20, h-20, 10, 10, d.color);
   });
 }
-
-
-
-
-
 
 
 function gameloop(){

@@ -10,9 +10,10 @@ function Planet(){
     this.field = this.radius + 30;
     this.color = 22;
     this.palette = [0,1,2,3,4,5,6]
-    this.gravity = 0.1;
+    this.gravity = 0.15;
     this.sectors = Math.floor( (this.radius*2*Math.PI)/3 );
     this.sectorsRemaining = this.sectors;
+    this.completeFlag = false;
     this.populated = false;
     this.drawColor = 37;
     this.disease = [];
@@ -48,6 +49,7 @@ Planet.prototype.draw = function(){
         //icky gray stuff
         r.pat = r.dither[8];
         this.disease.forEach(function(d){
+            r.pat = r.dither[d.dither];
             r.fillCircle(d.x - view.x, d.y - view.y, d.radius, 42);
         });
 
@@ -79,12 +81,23 @@ Planet.prototype.update = function(){
                     x: this.x + Math.cos(Math.random()*3.14159*2) * Math.random()*this.radius,
                     y: this.y + Math.sin(Math.random()*3.14159*2) * Math.random()*this.radius,
                     radius: Math.random()*12,
+                    dither: Math.floor(4+Math.random()*4)
                     });
             }    
             this.populated = true;
         }
         if(this.sectorsRemaining == 0){
             this.drawColor = this.color;
+            if(!this.completeFlag){
+                this.completeFlag = true;
+                this.disease = [];
+                let i = 40;
+                while(i--){
+                    let a = Math.random()*3.14159*2;
+                    let r = Math.random()*this.radius;
+                    splodes.push(new Splode(this.x + r*Math.cos(a), this.y + r*Math.sin(a), 50, Math.random()*63 ) );
+                }
+            }
         }
 
         let distx = this.x - p.x;

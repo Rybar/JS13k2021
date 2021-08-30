@@ -44,7 +44,7 @@ Sector.prototype.update = function(){
         let dist = Math.sqrt(distx*distx + disty*disty);
 
         if( dist <= this.radius + p.radius + 40 && p.fuel > 0){
-            if(this.radius <= this.maxRadius){
+            if(this.radius < this.maxRadius){
                 this.radius += 0.6;
                 p.fuel -= 0.6;
                 this.planet.disease.splice(0,1);
@@ -57,6 +57,7 @@ Sector.prototype.update = function(){
             this.radius = this.maxRadius;
             if(!this.complete){
                 this.complete = true;
+                this.reaching = false;
                 this.planet.sectorsRemaining--;
                 splodes.push(new Splode(this.x, this.y, 20, 14));
             }

@@ -26,11 +26,14 @@ Player = {
     planetAngle: 0,
     runSpeed: 2.5,
     turnSpeed: 0.1,
-    baseJumpSpeed: 2,
-    jumpSpeed: 2.2,
-    thrust: 0.04,
+    baseJumpSpeed: 2.7,
+    jumpSpeed: 2.7,
+    jumpSpeedIncrement: 0.4,
+    thrust: 0.1,
     yVel: 0,
     xVel: 0,
+    maxXVel: 4,
+    maxYVel: 4,
     fuel: 100,
     div12: Math.PI/6,
     forwardX: 0,
@@ -102,7 +105,7 @@ debugTxt =
 // YV ${this.yVel}\n
 `JS ${this.jumpSpeed}\n
 FUEL: ${this.fuel}\n
-ARM: ${this.armThrust}\n`
+ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
 //VX ${view.x} VY ${view.y}\n
 .toUpperCase();
 
@@ -110,13 +113,21 @@ ARM: ${this.armThrust}\n`
      },
 
     update: function(){
+        this.yVel = this.yVel > this.maxYVel ? this.maxYVel : this.yVel;
+        this.xVel = this.xVel > this.maxXVel ? this.maxXVel : this.xVel;
+        this.yVel = this.yVel < -this.maxYVel ? -this.maxYVel : this.yVel;
+        this.xVel = this.xVel < -this.maxXVel ? -this.maxXVel : this.xVel;
         this.y += this.yVel;
         this.x += this.xVel;
-        this.bodyAngle = this.angle// - Math.PI/2;
         
-        let velAngle = Math.atan2(this.yVel, this.xVel);
+        this.bodyAngle = this.angle// - Math.PI/2;
 
-        this.armThrust = this.legThrust =  Math.cos(this.bodyAngle - velAngle);
+        if(!this.colliding){
+        
+            let velAngle = Math.atan2(this.yVel, this.xVel);
+
+            this.armThrust = this.legThrust =  Math.cos(this.bodyAngle - velAngle);
+        }
 
         
 
