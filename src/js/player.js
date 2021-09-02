@@ -35,6 +35,7 @@ Player = {
     maxXVel: 4,
     maxYVel: 4,
     fuel: 100,
+    maxFuel: 300,
     div12: Math.PI/6,
     forwardX: 0,
     forwardy: 0,
@@ -67,6 +68,7 @@ Player = {
             forwardy = sy + Math.sin(this.angle) * (this.radius + 5),
             forwardXend = sx + Math.cos(this.angle) * (this.radius + 7),
             forwardyend = sy + Math.sin(this.angle) * (this.radius + 7),
+
             headx = sx + Math.cos(this.bodyAngle) * (this.radius),
             heady = sy + Math.sin(this.bodyAngle) * (this.radius),
             neckx = sx + Math.cos(this.bodyAngle) * (this.radius/2),
@@ -119,6 +121,8 @@ ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
         this.xVel = this.xVel < -this.maxXVel ? -this.maxXVel : this.xVel;
         this.y += this.yVel;
         this.x += this.xVel;
+        if(this.x > Ww){this.x = 0;}else if(this.x < 0){this.x = Ww;}
+        if(this.y > Wh){this.y = 0;}else if(this.y < 0){this.y = Wh;}
         
         this.bodyAngle = this.angle// - Math.PI/2;
 
@@ -129,10 +133,20 @@ ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
             this.armThrust = this.legThrust =  Math.cos(this.bodyAngle - velAngle);
         }
 
+        if(this.withinPlanetGravity){
+            this.angle = this.planetAngle;
+            this.legThrust = Math.cos(t/10);
+        }
+
+
         
 
-        if(this.fuel < 0){
+        if(this.fuel <= 0){
             this.fuel = 0;
+        }   
+
+        if(this.fuel >  this.maxFuel){
+            this.fuel = this.maxFuel;
         }
 
         if(this.planet){
@@ -191,6 +205,7 @@ ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
         if(this.colliding){
             this.xVel -= Math.cos(this.planetAngle + Math.PI/2) * this.runSpeed;
             this.yVel -= Math.sin(this.planetAngle + Math.PI/2) * this.runSpeed;
+            
         }else{
             this.angle -= this.turnSpeed;
             this.angle = this.angle % (Math.PI*2);

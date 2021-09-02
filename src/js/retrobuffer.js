@@ -216,7 +216,7 @@ var RetroBuffer = function(width, height, atlas, pages){
       }
       x += stepx;
       fraction += dy;   // same as fraction -= 2*dy
-      this.pset(x, y, this.pget(x-offsetX, y-offsetY, this.renderSource)+colorOffset );
+      this.pset(x, y, this.pget(x-offsetX%w, y-offsetY%h, this.renderSource)+colorOffset );
     }
     ;
   }

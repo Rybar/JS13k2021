@@ -39,11 +39,15 @@ Fuel.prototype.update = function(){
         let disty = this.y - p.y;
 
         this.dist = Math.sqrt(distx*distx + disty*disty);
-        if( this.dist <= this.radius + p.radius + 40 ){
+        if( this.dist <= this.radius + p.radius + 40){
 
-            this.radius -= 0.1;
-            p.fuel += 1;
-            this.reaching = true;
+            if(p.fuel < p.maxFuel){
+                this.radius -= 0.1;
+                p.fuel += 1;
+                this.reaching = true;
+            }else if(p.fuel == p.maxFuel){
+                //nothing yet
+            }
             
         }else {this.reaching = false;}
 

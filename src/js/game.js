@@ -2,7 +2,7 @@ import RetroBuffer from './retrobuffer.js';
 import MusicPlayer from './musicplayer.js';
 import song from './song.js';
 import cellComplete from './cellComplete.js';
-import { playSound, Key, choice, inView } from './utils.js';
+import { playSound, Key, choice, inView, planetCollision } from './utils.js';
 //import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
@@ -29,14 +29,41 @@ the overgrowth will drain them and then consume their bodies
 they will do damage if you touch them.
 
 Greeble Artifacts
+just to collect. nice to have. 
 give bonuses
 bonuses:
 increased fuel capacity
 increased jump strength (threshold is relative much food you have)
 
 no shooting! (unless it becomes apparent after implementation of mechanics that its not fun)
-fuel is auto-collected by proxixmity. 
-fuel chunk asteroids will shrink as you consume them.
+DUN fuel is auto-collected by proxixmity. 
+DUN fuel chunk asteroids will shrink as you consume them.
+
+
+TODO:  Prioritized
+DUN Fuel Capacity Ceiling,
+Fuel capicity increase powerup
+DUN World Edges -player can't leave the world
+
+Player drawing:
+DUN legs and arms walking motion on planet
+
+Enemy planet rovers
+  -roam the perimeter of the planet. Proximity drains pollen from you. 
+  -if a planet is left underpollinated, the rovers will drain the pollinated sectors.
+  -completing a planet destroys the rovers on it.
+
+player-enemy interaction
+  -proximity to enemy rovers drains pollen from you.
+  -can head-bounce enemy rovers to temporarily stun them.
+   while stunned they will not drain pollen from you.
+
+intelligent entity placement
+  -planets are placed in world with no overlap
+  -fuel chunks are placed in world with no overlap
+
+
+
 
 
 */
@@ -90,6 +117,7 @@ planets = [];
 sndData = [];
 Fuelrocks = [];
 planetSectors = [];
+harvesters = [];
 stars = [];
 collected = [];
 
@@ -109,15 +137,24 @@ function initGameData(){
     Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
   }
 
-  for(let i = 0; i < 50; i++){
+  for(let i = 0; i < 1000; i++){
     let p = new Planet();
     p.x = Math.floor(Math.random()*(Ww));
     p.y = Math.floor(Math.random()*(Wh));
-    p.radius = Math.floor(Math.random()*( (h/2*.66)-20)+20); // radius of planet, no bigger than 2/3 of screen height
+    p.radius = Math.floor(Math.random()*h+20); // radius of planet, no bigger than 2/3 of screen height
     p.field = p.radius + 45;
     let c = Math.floor(Math.random()*(55));
     p.color = c;
-    planets.push(p);
+    collides = true;
+    tries = 3000;
+    while(collides && tries--){
+      p.x = Math.floor(Math.random()*(Ww));
+      p.y = Math.floor(Math.random()*(Wh));
+      p.radius = Math.floor(Math.random()*h/2.25+20); // radius of planet, no bigger than 2/3 of screen height
+      p.field = p.radius + 45;
+      collides = planets.some(planetInArray =>{return planetCollision(p, planetInArray)})
+    }
+    if(!collides){planets.push(p)}
   }
 
   for(let i = 0; i < 10000; i++){
@@ -232,7 +269,12 @@ function drawMiniMap(){
 
 }
 
-
+function drawHUD(){
+  fuelBarWidth = (p.fuel/p.maxFuel)*(w/2);
+  
+  r.fillRect(10,h-10, fuelBarWidth, 5, 12);
+  r.rect(10,h-10, w/2, 5, 22);
+}
 /*
   ______                                            ______     __                 __                         
  /      \                                          /      \   |  \               |  \                        
@@ -255,11 +297,13 @@ function updateGame(){
   planets.forEach(e=>e.update());
   artifacts.forEach(e=>e.update());
   planetSectors.forEach(e=>e.update());
+  harvesters.forEach(e=>e.update());
   p.update();
   pruneDead(splodes);
   pruneDead(artifacts);
   pruneDead(Fuelrocks);
   pruneDead(planetSectors);
+  pruneDead(harvesters);
 
   if(Key.justReleased(Key.m)){
     minimapToggle = !minimapToggle;
@@ -282,10 +326,12 @@ function drawGame(){
   planets.forEach(e=>e.draw());
   splodes.forEach(e=>e.draw());
   artifacts.forEach(e=>e.draw());
+  harvesters.forEach(e=>e.draw());
   
   p.draw();
 
   drawCollected();
+  drawHUD();
   r.renderSource = r.PAGE_1;
   r.renderTarget = r.SCREEN;
   r.sspr(0,0,w,h,0,0,w,h,false,false);

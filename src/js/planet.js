@@ -1,6 +1,7 @@
 import Splode from './splode.js';
 import { inView, choice} from './utils.js';
 import Sector from './sector.js';
+import Harvester from './harvester.js';
 
 
 function Planet(){
@@ -12,6 +13,8 @@ function Planet(){
     this.palette = [0,1,2,3,4,5,6]
     this.gravity = 0.15;
     this.sectors = Math.floor( (this.radius*2*Math.PI)/3 );
+    this.harvesters = Math.floor(this.sectors/2);
+
     this.sectorsRemaining = this.sectors;
     this.completeFlag = false;
     this.populated = false;
@@ -72,8 +75,12 @@ Planet.prototype.update = function(){
             for(let i = 0; i < this.sectors; i++){
                 let x = this.x + this.radius * Math.cos(i*(2*Math.PI)/this.sectors);
                 let y = this.y + this.radius * Math.sin(i*(2*Math.PI)/this.sectors);
-                r.circle(x - view.x, y - view.y, 2, 22);
+                //r.circle(x - view.x, y - view.y, 2, 22);
                 planetSectors.push(new Sector(x, y, this) );
+            }
+            for(let i = 0; i < this.harvesters; i++){
+                let angle = 2*Math.PI/this.harvesters * i;
+                harvesters.push(new Harvester(angle, this) );
             }
             for(let i = 0; i < 300; i++){
                 this.disease.push(

@@ -6,6 +6,13 @@ export function choice(values) {
   return values[rand(0, values.length - 1)];
 };
 
+export function planetCollision(circleA, circleB){
+  let distX = circleA.x - circleB.x,
+      distY = circleA.y - circleA.y,
+      distance = Math.sqrt( (distX*distX) + (distY*distY) );
+  return distance < circleA.field + circleB.field;
+}
+
 export function inView(o, padding=0){
   return o.x - view.x + padding > 0 &&
          o.y - view.y + padding > 0 &&
