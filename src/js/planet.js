@@ -10,10 +10,11 @@ function Planet(){
     this.radius = 5;
     this.field = this.radius + 30;
     this.color = 22;
+    this.haloColor = 19;
     this.palette = [0,1,2,3,4,5,6]
     this.gravity = 0.15;
     this.sectors = 1;
-    this.harvesters = 1;
+    this.harvesters = 0;
 
     this.sectorsRemaining = this.sectors;
     this.completeFlag = false;
@@ -26,23 +27,41 @@ function Planet(){
 Planet.prototype.draw = function(){
    r.renderSource = r.PAGE_2;
 
+   if(inView(this, 2000) && !inView(this,50) && !this.completeFlag){
+        //radar HUD
+        if(t%2==0){
+            r.pat = r.dither[8];
+            let ax = this.x - p.x,
+                ay = this.y - p.y,
+                arrowAngle = Math.atan2(ay, ax),
+                drawX = p.x-view.x + Math.cos(arrowAngle) * (h/2 - 20);
+                drawY = p.y-view.y + Math.sin(arrowAngle) * (h/2 - 20);
+                let dist = Math.sqrt(ax*ax + ay*ay);
+
+                if(dist/100 < 12){
+                    r.circle(drawX, drawY, 12-( Math.min(12, Math.floor(dist/100))  ), 5);
+                }
+        }
+    }
+    
     if(inView(this, 200)){
         //only draw the pretty stuff if the planet is fully pollinated
         if(this.sectorsRemaining == 0){
             //oooh its pretty atmosphere halo time
             //outer haze
             r.pat = r.dither[15];
-            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+30, 17);
+            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+30, this.haloColor);
             //a bit thicker now
             r.pat = r.dither[13];
-            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+20, 17);
+            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+20, this.haloColor);
             r.pat = r.dither[11];
             //moar thick
-            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+8, 17);
+            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+8, this.haloColor);
             r.pat = r.dither[8];
             //that neat bright blue bit near the horizon
-            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+3, 17);
-            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+2, 18);
+            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+3, this.haloColor);
+            r.fillCircle(this.x - view.x, this.y - view.y, this.radius+2, this.haloColor+1);
+
         }
         
         r.pat = r.dither[0];
@@ -71,6 +90,7 @@ Planet.prototype.update = function(){
     if(inView(this, 200)){
 
         if(!this.populated){
+            this.haloColor=choice([18,15,29]);
             this.sectors = Math.round(this.radius/10);
             this.sectorsRemaining = this.sectors;
             this.harvesters = Math.round(this.sectors/2);

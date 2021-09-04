@@ -158,7 +158,7 @@ function initGameData(){
     Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
   }
 
-  for(let i = 0; i < 1000; i++){
+  for(let i = 0; i < 2000; i++){
     let p = new Planet();
     p.x = Math.floor(Math.random()*(Ww));
     p.y = Math.floor(Math.random()*(Wh));
@@ -167,7 +167,7 @@ function initGameData(){
     let c = Math.floor(Math.random()*(55));
     p.color = c;
     collides = true;
-    tries = 3000;
+    tries = 6000;
     while(collides && tries--){
       p.x = Math.floor(Math.random()*(Ww));
       p.y = Math.floor(Math.random()*(Wh));

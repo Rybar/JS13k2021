@@ -72,18 +72,18 @@ Player = {
             headx = sx + Math.cos(this.bodyAngle) * (this.radius),
             heady = sy + Math.sin(this.bodyAngle) * (this.radius),
             neckx = sx + Math.cos(this.bodyAngle) * (this.radius/2),
-            necky = sy + Math.sin(this.bodyAngle) * (this.radius/2),
+            necky = sy + Math.sin(this.bodyAngle) * (this.radius/2);
             
             
-            arm1x = neckx + Math.cos(this.bodyAngle + div12*3.5+this.armThrust ) * (this.radius),
-            arm1y = necky + Math.sin(this.bodyAngle + div12*3.5+this.armThrust ) * (this.radius),
-            arm2x = neckx + Math.cos(this.bodyAngle - div12*3.5-this.armThrust ) * (this.radius),
-            arm2y = necky + Math.sin(this.bodyAngle - div12*3.5-this.armThrust ) * (this.radius);
+            this.arm1x = arm1x = neckx + Math.cos(this.bodyAngle + div12*3.5+this.armThrust ) * (this.radius);
+            this.arm1y = arm1y = necky + Math.sin(this.bodyAngle + div12*3.5+this.armThrust ) * (this.radius);
+            this.arm2x = arm2x = neckx + Math.cos(this.bodyAngle - div12*3.5-this.armThrust ) * (this.radius);
+            this.arm2y = arm2y = necky + Math.sin(this.bodyAngle - div12*3.5-this.armThrust ) * (this.radius);
 
-            this.foot1x = foot1x = sx + Math.cos(this.bodyAngle + div12*5+this.legThrust ) * (this.radius),
-            this.foot1y = foot1y = sy + Math.sin(this.bodyAngle + div12*5+this.legThrust ) * (this.radius),
-            this.foot2x = foot2x = sx + Math.cos(this.bodyAngle - div12*5-this.legThrust ) * (this.radius),
-            this.foot2y = foot2y = sy + Math.sin(this.bodyAngle - div12*5-this.legThrust ) * (this.radius),
+            this.foot1x = foot1x = sx + Math.cos(this.bodyAngle + div12*5+this.legThrust ) * (this.radius);
+            this.foot1y = foot1y = sy + Math.sin(this.bodyAngle + div12*5+this.legThrust ) * (this.radius);
+            this.foot2x = foot2x = sx + Math.cos(this.bodyAngle - div12*5-this.legThrust ) * (this.radius);
+            this.foot2y = foot2y = sy + Math.sin(this.bodyAngle - div12*5-this.legThrust ) * (this.radius);
 
         r.circle(sx, sy, this.radius, 1); //collide circle
         r.line(forwardX, forwardy, forwardXend, forwardyend, 7); //forward line
@@ -209,6 +209,10 @@ ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
         }else{
             this.angle -= this.turnSpeed;
             this.angle = this.angle % (Math.PI*2);
+            if(!this.withinPlanetGravity){
+                splodes.push( new Splode(this.arm1x+view.x, this.arm1y+view.y, 5, choice([19,20,22]) ) );
+                //splodes.push( new Splode(this.arm2x+view.x, this.arm2y+view.y, 5, choice([19,20,22]) ) );
+             }
         }
     },
 
@@ -219,6 +223,10 @@ ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
         }else{
             this.angle += this.turnSpeed;
             this.angle = this.angle % (Math.PI*2);
+            if(!this.withinPlanetGravity){
+                //splodes.push( new Splode(this.arm1x+view.x, this.arm1y+view.y, 5, choice([19,20,22]) ) );
+                splodes.push( new Splode(this.arm2x+view.x, this.arm2y+view.y, 5, choice([19,20,22]) ) );
+             }
         }
     },
 
@@ -247,7 +255,13 @@ ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
         }else{
             this.xVel -= Math.cos(this.angle) * this.thrust;
             this.yVel -= Math.sin(this.angle) * this.thrust;
+
+            if(!this.withinPlanetGravity){
+                splodes.push( new Splode(this.arm1x+view.x, this.arm1y+view.y, 5, choice([19,20,22]) ) );
+                splodes.push( new Splode(this.arm2x+view.x, this.arm2y+view.y, 5, choice([19,20,22]) ) );
+             }
         }
+        
     },
 
     onPlanet: function(planet){;
