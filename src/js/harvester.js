@@ -50,22 +50,33 @@ Harvester.prototype.update = function(){
                 this.reaching = true;
                 if(dist <= this.radius + p.radius){
                     console.log(this.angle - p.angle-Math.PI);
+                    
                     if(Math.abs(p.xVel + p.yVel)/2 < 2){
-                        p.score += 1;
-                        this.hit = true;
-                        this.hitCount += 1;
-                        splodes.push(new Splode(this.x, this.y, 40, 5));
-                        if(this.hitCount > 3){
-                            this.alive = false;
-                            harvesters.splice(harvesters.indexOf(this), 1);7
-                            splodes.push(new Splode(this.x, this.y, 50, 6));
-                            splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 60, 7));
-                            splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 70, 5));
-                            
+                        if(p.fuel > 100){
+
+                            p.score += 1;
+                            this.hit = true;
+                            this.hitCount += 1;
+                            splodes.push(new Splode(this.x, this.y, 40, 5));
+                            if(this.hitCount > 3){
+                                this.alive = false;
+                                harvesters.splice(harvesters.indexOf(this), 1);
+                                splodes.push(new Splode(this.x, this.y, 50, 6));
+                                splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 60, 7));
+                                splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 70, 5));
+                                
+                            }
+                            p.xVel = Math.cos(p.angle) * 3;
+                            p.yVel = Math.sin(p.angle) * 3;
+                        }else {
+                            splodes.push(new Splode(this.x, this.y, 20, 22));
+                            p.xVel = Math.cos(p.angle) * 5;
+                            p.yVel = Math.sin(p.angle) * 5;
                         }
+                            
+                        
                     }
-                    p.xVel = Math.cos(p.angle) * 3;
-                    p.yVel = Math.sin(p.angle) * 3;
+                    
                     
 
                 } 

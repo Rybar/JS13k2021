@@ -101,17 +101,17 @@ Player = {
 
 
 
-debugTxt = 
-// `${this.withinPlanetGravity}\n
-// XV ${this.xVel}\n
-// YV ${this.yVel}\n
-`JS ${this.jumpSpeed}\n
-FUEL: ${this.fuel}\n
-ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
-//VX ${view.x} VY ${view.y}\n
-.toUpperCase();
+// debugTxt = 
+// // `${this.withinPlanetGravity}\n
+// // XV ${this.xVel}\n
+// // YV ${this.yVel}\n
+// `JS ${this.jumpSpeed}\n
+// FUEL: ${this.fuel}\n
+// ARM: ${this.armThrust}\nYV: ${this.yVel}\nXV: ${this.xVel}\n`
+// //VX ${view.x} VY ${view.y}\n
+// .toUpperCase();
 
-        r.text([debugTxt, 5, 5, 1, 1, 'left', 'top', 1, 22]);
+//         r.text([debugTxt, 5, 5, 1, 1, 'left', 'top', 1, 22]);
      },
 
     update: function(){

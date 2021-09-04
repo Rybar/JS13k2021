@@ -47,8 +47,8 @@ DUN World Edges -player can't leave the world
 
 Player drawing:
 Improve leg motion on planet
-hand jets when moving 'down'
-hand jet from left or right when turning
+DUN hand jets when moving 'down'
+DUN hand jet from left or right when turning
 
 Enemy planet rovers
   DUN-roam the perimeter of the planet. Proximity drains pollen from you. 
@@ -57,7 +57,7 @@ Enemy planet rovers
 
 player-enemy interaction
  DUN -proximity to enemy rovers drains pollen from you.
- draw red 'lasers' when you're close to an enemy rover
+ DUN draw red 'lasers' when you're close to an enemy rover
   -can head-bounce enemy rovers to temporarily stun them.
    while stunned they will not drain pollen from you.
 
@@ -160,9 +160,9 @@ function initGameData(){
 
   for(let i = 0; i < 2000; i++){
     let p = new Planet();
-    p.x = Math.floor(Math.random()*(Ww));
-    p.y = Math.floor(Math.random()*(Wh));
-    p.radius = Math.floor(Math.random()*h+20); // radius of planet, no bigger than 2/3 of screen height
+    p.x = Math.floor( Math.random()*(Ww-h*2)+h); //spawn planets not too close to edge of world
+    p.y = Math.floor(Math.random()*(Ww-h*2)+h);
+    p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2); // radius of planet, no bigger than roughly 80% of screen height
     p.field = p.radius + 45;
     let c = Math.floor(Math.random()*(55));
     p.color = c;
@@ -171,7 +171,7 @@ function initGameData(){
     while(collides && tries--){
       p.x = Math.floor(Math.random()*(Ww));
       p.y = Math.floor(Math.random()*(Wh));
-      p.radius = Math.floor(Math.random()*h/2.25+20); // radius of planet, no bigger than 2/3 of screen height
+      p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2);  // radius of planet, no bigger than 2/3 of screen height
       p.field = p.radius + 45;
       collides = planets.some(planetInArray =>{return planetCollision(p, planetInArray)})
     }
