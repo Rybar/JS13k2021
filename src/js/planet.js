@@ -12,8 +12,8 @@ function Planet(){
     this.color = 22;
     this.palette = [0,1,2,3,4,5,6]
     this.gravity = 0.15;
-    this.sectors = Math.floor( (this.radius*2*Math.PI)/3 );
-    this.harvesters = Math.floor(this.sectors/2);
+    this.sectors = 1;
+    this.harvesters = 1;
 
     this.sectorsRemaining = this.sectors;
     this.completeFlag = false;
@@ -71,7 +71,9 @@ Planet.prototype.update = function(){
     if(inView(this, 200)){
 
         if(!this.populated){
-
+            this.sectors = Math.round(this.radius/10);
+            this.sectorsRemaining = this.sectors;
+            this.harvesters = Math.round(this.sectors/2);
             for(let i = 0; i < this.sectors; i++){
                 let x = this.x + this.radius * Math.cos(i*(2*Math.PI)/this.sectors);
                 let y = this.y + this.radius * Math.sin(i*(2*Math.PI)/this.sectors);

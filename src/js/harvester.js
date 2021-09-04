@@ -36,8 +36,40 @@ Harvester.prototype.update = function(){
 
         if( dist <= this.radius + p.radius + 10){
                 p.fuel -= 0.6;
-                this.reaching = true; 
+                this.reaching = true;
+                if(dist <= this.radius + p.radius){
+                    //this hit logic doesn't work yet....
+                    console.log(this.angle - p.angle-Math.PI);
+                    if(Math.abs(this.angle - p.angle-Math.PI) < 2){
+                        p.score += 1;
+                        this.hit = true;
+                        this.hitCount += 1;
+                        if(this.hitCount > 3){
+                            this.alive = false;
+                            this.planet.harvesters.splice(this.planet.harvesters.indexOf(this), 1);
+                            splode = new Splode(this.x, this.y, 20, 6);
+                            splode.draw();
+                        }
+                    }
+                    p.xVel = Math.cos(p.angle) * 5;
+                    p.yVel = Math.sin(p.angle) * 5;
+                    
+
+                } 
         }else {this.reaching = false;}
+        
+        if(this.reaching){
+            let i = 10;
+            while(i--){
+                r.pat = r.dither[i];
+            r.line(this.x - view.x + (Math.random()-0.5) * this.radius*2,
+                    this.y - view.y + (Math.random()-0.5) * this.radius*2,
+                        p.x - view.x,
+                        p.y - view.y,
+                        3+Math.random()*5);
+            }
+        }
+        
 
     }
     // if(this.radius <= 0){

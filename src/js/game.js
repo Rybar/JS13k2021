@@ -3,14 +3,14 @@ import MusicPlayer from './musicplayer.js';
 import song from './song.js';
 import cellComplete from './cellComplete.js';
 import { playSound, Key, choice, inView, planetCollision } from './utils.js';
-//import Stats from './Stats.js';
+import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
 import Artifact from './artifact.js';
 import Fuel from './fuel.js';
 
-//stats = new Stats();
-//stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
 
 /*
@@ -46,22 +46,41 @@ Fuel capicity increase powerup
 DUN World Edges -player can't leave the world
 
 Player drawing:
-DUN legs and arms walking motion on planet
+Improve leg motion on planet
+hand jets when moving 'down'
+hand jet from left or right when turning
 
 Enemy planet rovers
-  -roam the perimeter of the planet. Proximity drains pollen from you. 
+  DUN-roam the perimeter of the planet. Proximity drains pollen from you. 
   -if a planet is left underpollinated, the rovers will drain the pollinated sectors.
   -completing a planet destroys the rovers on it.
 
 player-enemy interaction
-  -proximity to enemy rovers drains pollen from you.
+ DUN -proximity to enemy rovers drains pollen from you.
+ draw red 'lasers' when you're close to an enemy rover
   -can head-bounce enemy rovers to temporarily stun them.
    while stunned they will not drain pollen from you.
 
-intelligent entity placement
-  -planets are placed in world with no overlap
-  -fuel chunks are placed in world with no overlap
+sound design:
+  -music is expanded upon, more melody
+  -sector complete sound
+  -collide with harvester drone sound
+  -pollen drain sound -loop
+  -fuel chunk destroyed sound
+  -fuel dot collect sound
+  -player jets sound -loop
+  -planet complete jingle
 
+fuel rock interaction improvement:
+  -fuel rocks will shrink as you destroy them
+  -on destruction fuel rocks spawn fuel dots to be collected. 
+
+planet completion improvement:
+  -when sectors complete, they change in appearance.
+
+intelligent entity placement
+   DUN -planets are placed in world with no overlap
+  -fuel chunks are placed in world with no overlap
 
 
 
@@ -69,10 +88,12 @@ intelligent entity placement
 */
 
 
-w = Math.floor(innerWidth/3);
-h = Math.floor(innerHeight/3);
-Ww = w * 20;
-Wh = h * 20;
+w = Math.floor(innerWidth/4);
+h = Math.floor(innerHeight/4);
+wwFactor = 30;
+hhFactor = 30;
+Ww = w * wwFactor;
+Wh = h * hhFactor;
 view = {
   x: 0,
   y: 0,
@@ -109,7 +130,7 @@ function gameInit(){
   gameloop();
 }
 
-//document.body.appendChild( stats.dom );
+document.body.appendChild( stats.dom );
 
 window.t = 1;
 splodes = [];
@@ -246,26 +267,30 @@ function initAudio(){
 }
 
 function drawMiniMap(){
-  console.log('drawing minimap')
-  r.pal = r.palDefault;
+  r.pal = r.palDefault
   r.fillRect(0,0,w,h,0);
 
   planets.forEach(function(p){
-    r.fillCircle(p.x/20, p.y/20, (p.radius/20)+1, p.sectorsRemaining==0?p.color:40);
+    r.fillCircle(p.x/wwFactor, p.y/hhFactor, (p.radius/wwFactor)+1, p.sectorsRemaining==0?p.color:40);
     if(p.sectorsRemaining==0){
-      r.circle(p.x/20, p.y/20, (p.radius/20)+1, 19);
+      r.circle(p.x/wwFactor, p.y/hhFactor, (p.radius/wwFactor)+1, 19);
     }
   });
 
-  Fuelrocks.forEach(function(f){
-    r.pset(f.x/20, f.y/20, 2);
-  });p.color
+  // Fuelrocks.forEach(function(f){
+  //   r.pset(f.x/wwFactor, f.y/hhFactor, 2);
+  // });p.color
 
-  r.pset(p.x/20, p.y/20, 22);
-  r.pset((p.x/20)+1, (p.y/20)+1, 22);
-  r.pset((p.x/20)-1, (p.y/20)-1, 22);
-  r.pset((p.x/20)-1, (p.y/20)+1, 22);
-  r.pset((p.x/20)+1, (p.y/20)-1, 22);
+  if(t%2==0){ r.pset(p.x/wwFactor, p.y/wwFactor, 9);
+  r.pset((p.x/wwFactor)+1, (p.y/wwFactor)+1, 22);
+  r.pset((p.x/wwFactor)-1, (p.y/wwFactor)-1, 22);
+  r.pset((p.x/wwFactor)-1, (p.y/wwFactor)+1, 22);
+  r.pset((p.x/wwFactor)+1, (p.y/wwFactor)-1, 22);
+  r.pset((p.x/wwFactor)+2, (p.y/wwFactor)+2, 22);
+  r.pset((p.x/wwFactor)-2, (p.y/wwFactor)-2, 22);
+  r.pset((p.x/wwFactor)-2, (p.y/wwFactor)+2, 22);
+  r.pset((p.x/wwFactor)+2, (p.y/wwFactor)-2, 22);
+}
 
 }
 
@@ -420,7 +445,7 @@ function drawCollected(){
 
 function gameloop(){
   if(1==1){
-    //stats.begin();
+  stats.begin();
     switch(gamestate){
       case 0: //title screen
         titlescreen();
@@ -434,7 +459,7 @@ function gameloop(){
         break;
     }
     Key.update();
-    //stats.end();
+    stats.end();
     requestAnimationFrame(gameloop);
   }
 }
