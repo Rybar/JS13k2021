@@ -3,14 +3,14 @@ import MusicPlayer from './musicplayer.js';
 import song from './song.js';
 import cellComplete from './cellComplete.js';
 import { playSound, Key, choice, inView, planetCollision } from './utils.js';
-import Stats from './Stats.js';
+//import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
 import Artifact from './artifact.js';
 import Fuel from './fuel.js';
 
-stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+//stats = new Stats();
+//stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
 
 /*
@@ -76,14 +76,11 @@ fuel rock interaction improvement:
   -on destruction fuel rocks spawn fuel dots to be collected. 
 
 planet completion improvement:
-  -when sectors complete, they change in appearance.
+  -when sectors complete, they change in appearance.  -fuel chunks are placed in world with no overlap
+
 
 intelligent entity placement
    DUN -planets are placed in world with no overlap
-  -fuel chunks are placed in world with no overlap
-
-
-
 
 */
 
@@ -130,7 +127,7 @@ function gameInit(){
   gameloop();
 }
 
-document.body.appendChild( stats.dom );
+//document.body.appendChild( stats.dom );
 
 window.t = 1;
 splodes = [];
@@ -297,8 +294,9 @@ function drawMiniMap(){
 function drawHUD(){
   fuelBarWidth = (p.fuel/p.maxFuel)*(w/2);
   
-  r.fillRect(10,h-10, fuelBarWidth, 5, 12);
-  r.rect(10,h-10, w/2, 5, 22);
+  r.fillRect(w/4 , 10, w/2, 3, 2);
+  r.fillRect(w/4, 10, fuelBarWidth, 3, 12);
+  
 }
 /*
   ______                                            ______     __                 __                         
@@ -445,7 +443,7 @@ function drawCollected(){
 
 function gameloop(){
   if(1==1){
-  stats.begin();
+  //stats.begin();
     switch(gamestate){
       case 0: //title screen
         titlescreen();
@@ -459,7 +457,7 @@ function gameloop(){
         break;
     }
     Key.update();
-    stats.end();
+   // stats.end();
     requestAnimationFrame(gameloop);
   }
 }

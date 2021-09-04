@@ -99,6 +99,16 @@ Player = {
         r.line(neckx, necky, arm1x, arm1y, 22); //arm1
         r.line(neckx, necky, arm2x, arm2y, 22); //arm2
 
+        if(this.fuel > 100){
+            
+            for(let i = 0; i < this.fuel-100; i++){
+                let ra = Math.random()*2*Math.PI;
+                r.pset( sx + Math.cos(ra) * (this.radius + 5 + Math.random()*5),
+                        sy + Math.sin(ra) * (this.radius + 5 + Math.random()*5),
+                        9)
+            }
+        }
+
 
 
 // debugTxt = 
