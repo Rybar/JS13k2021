@@ -1,5 +1,5 @@
 import Splode from "./splode";
-import { Key, choice } from "./utils";
+import { Key, choice, playSound } from "./utils";
 
 /*
 TODO: implement double jump or thrust after jump to escape from gravity
@@ -53,13 +53,14 @@ Player = {
     arm1y: 0,
     arm2x: 0,
     arm2y: 0,
+    jetnoise: {},
+    init: false,
 
 
 
     draw: function(){
-        r.pat = r.dither[0];
         
-
+        r.pat=r.dither[0];
         let sx = this.x - view.x,
             sy = this.y - view.y,
             div12 = this.div12,
@@ -125,6 +126,11 @@ Player = {
      },
 
     update: function(){
+        if(!this.init){
+            this.jetnoise = playSound(sounds.jet, 0.6, 0, 0.1, true);
+            this.jetnoise.volume.gain.value = 0;
+            this.init = true;
+        }else{this.jetnoise.volume.gain.value = 0;}
         this.yVel = this.yVel > this.maxYVel ? this.maxYVel : this.yVel;
         this.xVel = this.xVel > this.maxXVel ? this.maxXVel : this.xVel;
         this.yVel = this.yVel < -this.maxYVel ? -this.maxYVel : this.yVel;
@@ -200,13 +206,13 @@ Player = {
         if(Key.isDown(Key.UP) || Key.isDown(Key.z) || Key.isDown(Key.w) ){ this.moveUp() }
         else if(Key.isDown(Key.DOWN) || Key.isDown(Key.w) ){ this.moveDown() }
 
-        if(Key.justReleased(Key.SPACE)){
-            for(let i = 10; i > 0; i--){
-            splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
-            }
-            playSound(sounds.cellComplete)
+        // if(Key.justReleased(Key.SPACE)){
+        //     for(let i = 10; i > 0; i--){
+        //     splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
+        //     }
+        //     playSound(sounds.cellComplete)
             
-        }
+        // }
         
 
     },
@@ -221,7 +227,7 @@ Player = {
             this.angle = this.angle % (Math.PI*2);
             if(!this.withinPlanetGravity){
                 splodes.push( new Splode(this.arm1x+view.x, this.arm1y+view.y, 5, choice([19,20,22]) ) );
-                //splodes.push( new Splode(this.arm2x+view.x, this.arm2y+view.y, 5, choice([19,20,22]) ) );
+                this.jetnoise.volume.gain.value = 0.03;
              }
         }
     },
@@ -234,8 +240,8 @@ Player = {
             this.angle += this.turnSpeed;
             this.angle = this.angle % (Math.PI*2);
             if(!this.withinPlanetGravity){
-                //splodes.push( new Splode(this.arm1x+view.x, this.arm1y+view.y, 5, choice([19,20,22]) ) );
                 splodes.push( new Splode(this.arm2x+view.x, this.arm2y+view.y, 5, choice([19,20,22]) ) );
+                this.jetnoise.volume.gain.value = 0.03;
              }
         }
     },
@@ -254,6 +260,7 @@ Player = {
             if(!this.withinPlanetGravity){
                 splodes.push( new Splode(this.foot1x+view.x, this.foot1y+view.y, 5, choice([7,8,22]) ) );
                 splodes.push( new Splode(this.foot2x+view.x, this.foot2y+view.y, 5, choice([7,8,22]) ) );
+                this.jetnoise.volume.gain.value = 0.03;
              }
         }
     },
@@ -269,6 +276,7 @@ Player = {
             if(!this.withinPlanetGravity){
                 splodes.push( new Splode(this.arm1x+view.x, this.arm1y+view.y, 5, choice([19,20,22]) ) );
                 splodes.push( new Splode(this.arm2x+view.x, this.arm2y+view.y, 5, choice([19,20,22]) ) );
+                this.jetnoise.volume.gain.value = 0.03;
              }
         }
         

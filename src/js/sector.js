@@ -1,4 +1,4 @@
-import { inView } from './utils.js';
+import { inView, playSound } from './utils.js';
 import Splode from './splode.js';
 
 function Sector(x,y, planet){
@@ -55,6 +55,7 @@ Sector.prototype.update = function(){
                 p.fuel -= 0.6;
                 this.planet.disease.splice(0,1);
                 this.reaching = true;
+                sectorFillSound.volume.gain.value = 0.1;
             }else{this.reaching = false;}
             
         }else {this.reaching = false;}
@@ -63,6 +64,7 @@ Sector.prototype.update = function(){
             this.radius = this.maxRadius;
             if(!this.complete){
                 this.complete = true;
+                playSound(sounds.sectorget);
                 this.reaching = false;
                 this.planet.sectorsRemaining--;
                 splodes.push(new Splode(this.x+Math.random()*10, this.y+Math.random()*10, 30, 14));

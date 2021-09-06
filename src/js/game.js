@@ -2,6 +2,12 @@ import RetroBuffer from './retrobuffer.js';
 import MusicPlayer from './musicplayer.js';
 import song from './song.js';
 import cellComplete from './cellComplete.js';
+import tada from './tada.js';
+import absorbray from './absorbray.js';
+import boom1 from './boom1.js';
+import jet from './jet.js';
+import sectorget from './sectorget.js';
+import bump from './bump.js';
 import { playSound, Key, choice, inView, planetCollision } from './utils.js';
 //import Stats from './Stats.js';
 import Player from './player.js';
@@ -63,20 +69,20 @@ player-enemy interaction
 
 sound design:
   -music is expanded upon, more melody
-  -sector complete sound
-  -collide with harvester drone sound
+  DUN-sector complete sound
+  DUN-collide with harvester drone sound
   -pollen drain sound -loop
   -fuel chunk destroyed sound
   -fuel dot collect sound
-  -player jets sound -loop
-  -planet complete jingle
+  DUN-player jets sound -loop
+  DUN-planet complete jingle
 
 fuel rock interaction improvement:
   -fuel rocks will shrink as you destroy them
   -on destruction fuel rocks spawn fuel dots to be collected. 
 
 planet completion improvement:
-  -when sectors complete, they change in appearance.  -fuel chunks are placed in world with no overlap
+  DUN -when sectors complete, they change in appearance.  -fuel chunks are placed in world with no overlap
 
 
 intelligent entity placement
@@ -143,15 +149,18 @@ artifacts = [];
 
 sounds = {};
 soundsReady = 0;
-totalSounds = 2;
+totalSounds = 8;
 audioTxt = "";
 debugText = "";
 darkness = 0;
+absorbSound = {};
+harverterSuckSound = {};
+sectorFillSound = {};
 minimapToggle = false;
 
 function initGameData(){
 
-  for(let i = 0; i < 1000; i++){
+  for(let i = 0; i < 1500; i++){
     Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
   }
 
@@ -234,11 +243,26 @@ function initAudio(){
   console.log('audio initializing');
   audioCtx = new AudioContext;
   audioMaster = audioCtx.createGain();
-  audioMaster.connect(audioCtx.destination);
+  compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.setValueAtTime(-60, audioCtx.currentTime);
+    compressor.knee.setValueAtTime(40, audioCtx.currentTime); 
+    compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+    compressor.attack.setValueAtTime(0, audioCtx.currentTime);
+    compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+
+  audioMaster.connect(compressor);
+  compressor.connect(audioCtx.destination);
 
   sndData = [
     {name:'song', data: song},
     {name:'cellComplete', data: cellComplete},
+    {name:'tada', data: tada},
+    {name:'boom1', data: boom1},
+    {name:'jet', data: jet},
+    {name:'absorbray', data: absorbray},
+    {name:'sectorget', data: sectorget},
+    {name:'bump', data: bump}
+
   ]
   totalSounds = sndData.length;
   soundsReady = 0;
@@ -313,6 +337,10 @@ function drawHUD(){
 */
 function updateGame(){
   t+=1;
+  absorbSound.volume.gain.value = 0;
+  harverterSuckSound.volume.gain.value = 0;
+  sectorFillSound.volume.gain.value = 0;
+
   view.x = p.x - mw;
   view.y = p.y - mh;
   Fuelrocks.forEach(e=>e.update());
@@ -377,6 +405,12 @@ function titlescreen(){
     initAudio();
     }else {
       playSound(sounds.song, 1,0,0.3, true);
+      absorbSound = playSound(sounds.absorbray, 1, 0, 0.1, true);
+      absorbSound.volume.gain.value = 0;
+      harverterSuckSound = playSound(sounds.absorbray, 0.5, 0, 0.1, true);
+      harverterSuckSound.volume.gain.value = 0;
+      sectorFillSound = playSound(sounds.absorbray, 1.5, 0, 0.1, true);
+      sectorFillSound.volume.gain.value = 0;
       gamestate = 1;
     }
   }; 

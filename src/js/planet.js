@@ -1,5 +1,5 @@
 import Splode from './splode.js';
-import { inView, choice} from './utils.js';
+import { inView, choice, playSound} from './utils.js';
 import Sector from './sector.js';
 import Harvester from './harvester.js';
 
@@ -29,19 +29,18 @@ Planet.prototype.draw = function(){
 
    if(inView(this, 2000) && !inView(this,50) && !this.completeFlag){
         //radar HUD
-        if(t%2==0){
-            r.pat = r.dither[8];
-            let ax = this.x - p.x,
-                ay = this.y - p.y,
-                arrowAngle = Math.atan2(ay, ax),
-                drawX = p.x-view.x + Math.cos(arrowAngle) * (h/2 - 20);
-                drawY = p.y-view.y + Math.sin(arrowAngle) * (h/2 - 20);
-                let dist = Math.sqrt(ax*ax + ay*ay);
+        let ax = this.x - p.x,
+            ay = this.y - p.y,
+            arrowAngle = Math.atan2(ay, ax),
+            drawX = p.x-view.x + Math.cos(arrowAngle) * (h/2 - 20);
+            drawY = p.y-view.y + Math.sin(arrowAngle) * (h/2 - 20);
+            let dist = Math.sqrt(ax*ax + ay*ay);
 
-                if(dist/100 < 12){
-                    r.circle(drawX, drawY, 12-( Math.min(12, Math.floor(dist/100))  ), 5);
-                }
-        }
+            if(dist/100 < 12){
+                r.pat=r.dither[8]
+                r.circle(drawX, drawY, 12-( Math.min(12, Math.floor(dist/100))  ), 7);
+                r.pat=r.dither[0]
+            }
     }
     
     if(inView(this, 200)){
@@ -119,6 +118,7 @@ Planet.prototype.update = function(){
             this.drawColor = this.color;
             if(!this.completeFlag){
                 this.completeFlag = true;
+                playSound(sounds.tada);
                 this.disease = [];
                 let i = 80;
                 while(i--){

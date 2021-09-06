@@ -45,6 +45,7 @@ Fuel.prototype.update = function(){
                 this.radius -= 0.1;
                 p.fuel += 1;
                 this.reaching = true;
+                absorbSound.volume.gain.value = 0.1;
             }else if(p.fuel == p.maxFuel){
                 //nothing yet
             }
@@ -54,7 +55,9 @@ Fuel.prototype.update = function(){
     }
     
     if(this.radius <= 0){
+        splodes.push(new Splode(this.x, this.y, 120, 9));
         this.alive = false;
+
     }
         
     
