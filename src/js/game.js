@@ -71,7 +71,7 @@ sound design:
   -music is expanded upon, more melody
   DUN-sector complete sound
   DUN-collide with harvester drone sound
-  -pollen drain sound -loop
+  DUN -pollen drain sound -loop
   -fuel chunk destroyed sound
   -fuel dot collect sound
   DUN-player jets sound -loop
@@ -105,6 +105,7 @@ mw = w/2; mh = h/2;
 k=[]
 gamestate=0;
 paused = false;
+started=false;
 
 
 p = Player;
@@ -144,6 +145,7 @@ planetSectors = [];
 harvesters = [];
 stars = [];
 collected = [];
+
 
 artifacts = [];
 
@@ -400,9 +402,10 @@ function titlescreen(){
   r.text(["INTERSTELLAR\nPLANET POLLINATOR", w/2-2, 50, 3, 5, 'center', 'top', 3, 19]);
   r.text([audioTxt, w/2-2, 100, 1, 3, 'center', 'top', 1, 22]);
   if(Key.justReleased(Key.UP) || Key.justReleased(Key.w) || Key.justReleased(Key.z)){
-    if(soundsReady == 0){
+    if(soundsReady == 0 && !started){
     initGameData();
     initAudio();
+    started = true;
     }else {
       playSound(sounds.song, 1,0,0.3, true);
       absorbSound = playSound(sounds.absorbray, 1, 0, 0.1, true);
@@ -416,11 +419,11 @@ function titlescreen(){
   }; 
 
   if(soundsReady == totalSounds){
-    audioTxt="ALL SOUNDS LOADED.\nCLICK OR PRESS UP/W/Z TO CONTINUE";
+    audioTxt="ALL SOUNDS RENDERED.\nCLICK OR PRESS UP/W/Z TO CONTINUE";
   } else if (soundsReady > 0){
-    audioTxt = "SOUNDS LOADING... " + soundsReady;
+    audioTxt = "SOUNDS RENDERING... " + soundsReady;
   } else {
-    audioTxt = "CLICK TO INITIALIZE\nLOADING SEQUENCE";
+    audioTxt = "CLICK TO INITIALIZE\nGENERATION SEQUENCE";
   }
   r.renderSource = r.PAGE_1;
   r.renderTarget = r.SCREEN;
@@ -447,9 +450,10 @@ onclick=e=>{
   paused = false;
   switch(gamestate){
       case 0: // react to clicks on screen 0s
-        if(soundsReady == 0){
+        if(soundsReady == 0 && !started){
           initGameData();
           initAudio();
+          started = true;
         }else if(soundsReady == totalSounds) {gamestate = 1;playSound(sounds.song, 1,0,0.3, true);}
       break;
       case 1: // react to clicks on screen 1
