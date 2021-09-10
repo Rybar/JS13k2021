@@ -8,6 +8,7 @@ function Harvester(angle, planet){
     this.hit = false;
     this.hitCount = 0;
     this.alive = true
+    this.health = 100;
     this.reaching = false;
     this.angle = angle;
     this.planet = planet;
@@ -37,9 +38,11 @@ Harvester.prototype.update = function(){
     this.x = this.planet.x + Math.cos(this.angle) * (this.planet.radius + Math.sin(t/5)*5);
     this.y = this.planet.y + Math.sin(this.angle) * (this.planet.radius + Math.sin(t/5)*5);
     this.angle += 0.01;
-    
+    if(inView(this, -20)){
+        p.enemiesInView.push(this);
+    }
     if(inView(this, 10)){
-
+        
         let distx = this.x - p.x;
         let disty = this.y - p.y;
 
@@ -59,15 +62,7 @@ Harvester.prototype.update = function(){
                             this.hitCount += 1;
                             splodes.push(new Splode(this.x, this.y, 40, 5));
                             playSound(sounds.boom1, 3, 0, 0.05, false);
-                            if(this.hitCount > 3){
-                                this.alive = false;
-                                harvesters.splice(harvesters.indexOf(this), 1);
-                                splodes.push(new Splode(this.x, this.y, 50, 6));
-                                splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 60, 7));
-                                splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 70, 5));
-                                playSound(sounds.boom1, 1, 0, 0.1, false);
-                                
-                            }
+                            
                             p.xVel = Math.cos(p.angle) * 3;
                             p.yVel = Math.sin(p.angle) * 3;
                         }else {
@@ -84,6 +79,15 @@ Harvester.prototype.update = function(){
 
                 } 
         }else {this.reaching = false;}
+        if(this.health <= 0){
+            this.alive = false;
+            harvesters.splice(harvesters.indexOf(this), 1);
+            splodes.push(new Splode(this.x, this.y, 50, 6));
+            splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 60, 7));
+            splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 70, 5));
+            playSound(sounds.boom1, 1, 0, 0.1, false);
+            
+        }
 
        
         

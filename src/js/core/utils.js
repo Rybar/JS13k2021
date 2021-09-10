@@ -5,7 +5,9 @@ export function rand(min, max) {
 export function choice(values) {
   return values[rand(0, values.length - 1)];
 };
-
+export function lerp(a, b, x){
+   return a + (b -a ) * x;
+}
 export function planetCollision(circleA, circleB){
   let distX = circleA.x - circleB.x,
       distY = circleA.y - circleA.y,

@@ -34,7 +34,7 @@ Player = {
     xVel: 0,
     maxXVel: 4,
     maxYVel: 4,
-    fuel: 100,
+    fuel: 150,
     maxFuel: 300,
     div12: Math.PI/6,
     forwardX: 0,
@@ -54,7 +54,9 @@ Player = {
     arm2x: 0,
     arm2y: 0,
     jetnoise: {},
+    babies:0,
     init: false,
+    enemiesInView: [],
 
 
 
@@ -86,8 +88,8 @@ Player = {
             this.foot2x = foot2x = sx + Math.cos(this.bodyAngle - div12*5-this.legThrust ) * (this.radius);
             this.foot2y = foot2y = sy + Math.sin(this.bodyAngle - div12*5-this.legThrust ) * (this.radius);
 
-        r.circle(sx, sy, this.radius, 1); //collide circle
-        r.line(forwardX, forwardy, forwardXend, forwardyend, 7); //forward line
+        //r.circle(sx, sy, this.radius, 1); //collide circle
+        //r.line(forwardX, forwardy, forwardXend, forwardyend, 7); //forward line
 
         r.fillCircle(headx, heady, 2, 22); //head
         r.circle(foot1x, foot1y, 1, 22); //foot1
@@ -100,15 +102,15 @@ Player = {
         r.line(neckx, necky, arm1x, arm1y, 22); //arm1
         r.line(neckx, necky, arm2x, arm2y, 22); //arm2
 
-        if(this.fuel > 100){
+        // if(this.fuel > 100){
             
-            for(let i = 0; i < this.fuel-100; i++){
-                let ra = Math.random()*2*Math.PI;
-                r.pset( sx + Math.cos(ra) * (this.radius + 5 + Math.random()*5),
-                        sy + Math.sin(ra) * (this.radius + 5 + Math.random()*5),
-                        9)
-            }
-        }
+        //     for(let i = 0; i < this.fuel-100; i++){
+        //         let ra = Math.random()*2*Math.PI;
+        //         r.pset( sx + Math.cos(ra) * (this.radius + 5 + Math.random()*5),
+        //                 sy + Math.sin(ra) * (this.radius + 5 + Math.random()*5),
+        //                 9)
+        //     }
+        // }
 
 
 
@@ -126,6 +128,7 @@ Player = {
      },
 
     update: function(){
+        this.fuel -= 0.005;
         if(!this.init){
             this.jetnoise = playSound(sounds.jet, 0.6, 0, 0.1, true);
             this.jetnoise.volume.gain.value = 0;
@@ -191,15 +194,11 @@ Player = {
         }
         
         if(this.colliding){
-            this.color = 7;
             this.yVel = 0;
             this.xVel = 0;
             
         }
-        else{
-            this.color = 4;
-        };
-
+        
         if( Key.isDown(Key.LEFT) || Key.isDown(Key.q) || Key.isDown(Key.a) ){ this.moveLeft() }
         else if(Key.isDown(Key.RIGHT) || Key.isDown(Key.d) ){ this.moveRight() }
 
@@ -289,7 +288,13 @@ Player = {
         this.angle = Math.atan2(this.py, this.px);
         this.withinPlanetGravity = true;
         
+    },
+
+    reset: function(){
+        this.fuel = 100;
+        this.xVel = this.yVel = 0;
     }
+
 
 }
 

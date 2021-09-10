@@ -12,9 +12,10 @@ import { playSound, Key, choice, inView, planetCollision } from './core/utils.js
 //import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
+import Baby from './baby.js';
 import Artifact from './artifact.js';
 import Fuel from './fuel.js';
-
+window.baby = Baby;
 //stats = new Stats();
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
@@ -71,10 +72,10 @@ intelligent entity placement
 */
 
 
-w = Math.floor(innerWidth/4);
-h = Math.floor(innerHeight/4);
-wwFactor = 10;
-hhFactor = 10;
+w = Math.floor(innerWidth/3.5);
+h = Math.floor(innerHeight/3.5);
+wwFactor = 35;
+hhFactor = 35;
 Ww = w * wwFactor;
 Wh = h * hhFactor;
 view = {
@@ -82,7 +83,6 @@ view = {
   y: 0,
 }
 mw = w/2; mh = h/2;
-k=[]
 gamestate=0;
 paused = false;
 started=false;
@@ -123,6 +123,7 @@ planetSectors = [];
 harvesters = [];
 stars = [];
 collected = [];
+babies = [];
 
 
 artifacts = [];
@@ -144,33 +145,41 @@ function initGameData(){
   let pl = new Planet();
   pl.x = p.x - 100;
   pl.y = p.y - 100;
+  pl.radius = 25;
+  planets.push(pl);
+
+  pl = new Planet;
+  pl.x = p.x + 200;
+  pl.y = p.y - 100;
+  pl.radius = 40;
+  pl.harvesters = 2;
 
   planets.push(pl);
 
 
-  // for(let i = 0; i < 1500; i++){
-  //   Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
-  // }
+  for(let i = 0; i < 100; i++){
+    Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
+  }
 
-  // for(let i = 0; i < 2000; i++){
-  //   let p = new Planet()
-  //   p.x = Math.floor( Math.random()*(Ww-h*2)+h); //spawn planets not too close to edge of world
-  //   p.y = Math.floor(Math.random()*(Ww-h*2)+h);
-  //   p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2); // radius of planet, no bigger than roughly 80% of screen height
-  //   p.field = p.radius + 45;
-  //   let c = Math.floor(Math.random()*(55));
-  //   p.color = c;
-  //   collides = true;
-  //   tries = 6000;
-  //   while(collides && tries--){
-  //     p.x = Math.floor(Math.random()*(Ww));
-  //     p.y = Math.floor(Math.random()*(Wh));
-  //     p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2);  // radius of planet, no bigger than 2/3 of screen height
-  //     p.field = p.radius + 45;
-  //     collides = planets.some(planetInArray =>{return planetCollision(p, planetInArray)})
-  //   }
-  //   if(!collides){planets.push(p)}
-  // }
+  for(let i = 0; i < 1000; i++){
+    let p = new Planet()
+    p.x = Math.floor( Math.random()*(Ww-h*2)+h); //spawn planets not too close to edge of world
+    p.y = Math.floor(Math.random()*(Ww-h*2)+h);
+    p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2); // radius of planet, no bigger than roughly 80% of screen height
+    p.harvesters = 1 + Math.floor(Math.random()*5);
+    let c = Math.floor(Math.random()*(55));
+    p.color = c;
+    collides = true;
+    tries = 6000;
+    while(collides && tries--){
+      p.x = Math.floor(Math.random()*(Ww));
+      p.y = Math.floor(Math.random()*(Wh));
+      p.radius = Math.max(p.radius--, 15);  // radius of planet, no bigger than 2/3 of screen height
+      p.field = p.radius + 45;
+      collides = planets.some(planetInArray =>{return planetCollision(p, planetInArray)})
+    }
+    if(!collides){planets.push(p)}
+  }
 
   for(let i = 0; i < 10000; i++){
     stars.push({
@@ -338,12 +347,16 @@ function updateGame(){
   artifacts.forEach(e=>e.update());
   planetSectors.forEach(e=>e.update());
   harvesters.forEach(e=>e.update());
+  babies.forEach(e=>e.update());
   p.update();
   pruneDead(splodes);
   pruneDead(artifacts);
   pruneDead(Fuelrocks);
   pruneDead(planetSectors);
   pruneDead(harvesters);
+  pruneDead(babies);
+  pruneScreen(p.enemiesInView);
+  pruneDead(p.enemiesInView);
 
   if(Key.justReleased(Key.m)){
     minimapToggle = !minimapToggle;
@@ -369,6 +382,7 @@ function drawGame(){
   splodes.forEach(e=>e.draw());
   artifacts.forEach(e=>e.draw());
   harvesters.forEach(e=>e.draw());
+  babies.forEach(e=>e.draw());
   
   p.draw();
 
@@ -393,8 +407,10 @@ function resetGame(){
   stars = [];
   collected = [];
   artifacts = [];
+  babies = [];
   r.pat = r.dither[0];
   initGameData();
+  p.reset();
   gamestate = 0;
 }
 
@@ -472,6 +488,15 @@ function pruneDead(entitiesArray){
   for(let i = 0; i < entitiesArray.length; i++){
     let e = entitiesArray[i];
     if(!e.alive){
+      entitiesArray.splice(i,1);
+    }
+  }
+}
+
+function pruneScreen(entitiesArray){
+  for(let i = 0; i < entitiesArray.length; i++){
+    let e = entitiesArray[i];
+    if(!inView(e)){
       entitiesArray.splice(i,1);
     }
   }

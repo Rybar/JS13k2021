@@ -2,6 +2,7 @@ import Splode from './splode.js';
 import { inView, choice, playSound} from './core/utils.js';
 import Sector from './sector.js';
 import Harvester from './harvester.js';
+import Baby from './baby.js';
 
 
 function Planet(){
@@ -27,7 +28,7 @@ function Planet(){
 Planet.prototype.draw = function(){
    r.renderSource = r.PAGE_2;
 
-   if(inView(this, 2000) && !inView(this,50) && !this.completeFlag){
+   if(inView(this, 2000) && !inView(this,50)){
         //radar HUD
         let ax = this.x - p.x,
             ay = this.y - p.y,
@@ -38,7 +39,7 @@ Planet.prototype.draw = function(){
 
             if(dist/100 < 12){
                 r.pat=r.dither[8]
-                r.circle(drawX, drawY, 12-( Math.min(12, Math.floor(dist/100))  ), 7);
+                r.circle(drawX, drawY, 12-( Math.min(12, Math.floor(dist/100))  ), this.completeFlag ? 19 : 7);
                 r.pat=r.dither[0]
             }
     }
@@ -62,7 +63,7 @@ Planet.prototype.draw = function(){
             r.fillCircle(this.x - view.x, this.y - view.y, this.radius+2, this.haloColor+1);
 
             if(this.reaching){
-                p.fuel += 0.1;
+                
                 r.pat = r.dither[12]
                 let i = 10;
                 while(i--){
@@ -101,8 +102,9 @@ Planet.prototype.draw = function(){
 Planet.prototype.update = function(){
 
     if(inView(this, 200)){
-
+        this.reaching = false;
         if(!this.populated){
+            this.field = this.radius + 45;
             this.haloColor=choice([18,15,29]);
             this.sectors = Math.round(this.radius/10);
             this.sectorsRemaining = this.sectors;
@@ -140,6 +142,7 @@ Planet.prototype.update = function(){
                     let r = Math.random()*this.radius;
                     splodes.push(new Splode(this.x + r*Math.cos(a), this.y + r*Math.sin(a), 20+Math.random()*50, choice([20,21,22]) ) );
                 }
+                babies.push(new Baby(this.x, this.y));
             }
         }
 
@@ -147,8 +150,12 @@ Planet.prototype.update = function(){
         let disty = this.y - p.y;
 
         let dist = Math.sqrt(distx*distx + disty*disty);
-        if( dist <= this.field + p.radius +50){
+        if( dist <= this.field + p.radius + 100){
             this.reaching = true;
+            
+        }
+        if(this.completeFlag && this.reaching){
+            p.fuel += 0.06;
         }
         if( dist <= this.field + p.radius ){
 
