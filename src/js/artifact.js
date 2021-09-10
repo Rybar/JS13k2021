@@ -1,4 +1,4 @@
-import { inView } from './utils.js';
+import { inView } from './core/utils.js';
 import Splode from './splode.js';
 
 function Artifact(x,y, radius, color){

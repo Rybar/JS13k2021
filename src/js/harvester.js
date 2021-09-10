@@ -1,4 +1,4 @@
-import { inView, playSound } from './utils.js';
+import { inView, playSound } from './core/utils.js';
 import Splode from './splode.js';
 
 function Harvester(angle, planet){
@@ -34,8 +34,8 @@ Harvester.prototype.draw = function(){
 
 }
 Harvester.prototype.update = function(){
-    this.x = this.planet.x + Math.cos(this.angle) * this.planet.radius;
-    this.y = this.planet.y + Math.sin(this.angle) * this.planet.radius;
+    this.x = this.planet.x + Math.cos(this.angle) * (this.planet.radius + Math.sin(t/5)*5);
+    this.y = this.planet.y + Math.sin(this.angle) * (this.planet.radius + Math.sin(t/5)*5);
     this.angle += 0.01;
     
     if(inView(this, 10)){
@@ -50,7 +50,6 @@ Harvester.prototype.update = function(){
                 this.reaching = true;
                 harverterSuckSound.volume.gain.value = 0.1;
                 if(dist <= this.radius + p.radius){
-                    console.log(this.angle - p.angle-Math.PI);
                     
                     if(Math.abs(p.xVel + p.yVel)/2 < 2){
                         if(p.fuel > 100){

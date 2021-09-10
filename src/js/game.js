@@ -1,14 +1,14 @@
-import RetroBuffer from './retrobuffer.js';
+import RetroBuffer from './core/RetroBuffer.js';
 import MusicPlayer from './musicplayer.js';
-import song from './song.js';
-import cellComplete from './cellComplete.js';
-import tada from './tada.js';
-import absorbray from './absorbray.js';
-import boom1 from './boom1.js';
-import jet from './jet.js';
-import sectorget from './sectorget.js';
-import bump from './bump.js';
-import { playSound, Key, choice, inView, planetCollision } from './utils.js';
+import song from './sounds/song.js';
+import cellComplete from './sounds/cellComplete.js';
+import tada from './sounds/tada.js';
+import absorbray from './sounds/absorbray.js';
+import boom1 from './sounds/boom1.js';
+import jet from './sounds/jet.js';
+import sectorget from './sounds/sectorget.js';
+import bump from './sounds/bump.js';
+import { playSound, Key, choice, inView, planetCollision } from './core/utils.js';
 //import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
@@ -22,79 +22,59 @@ import Fuel from './fuel.js';
 /*
 Interstellar Planet Pollinator
 collect resources to turn into planet food. 
-Press down to pollinate the planet. 360 around the planet gets bonus points.
 planets will have a different number of sectors to be pollinated depending on circumference.
 planet object will track sector pollination status
 pollinated: complete
-overpollinated: will damage harvest bots as they walk over
 
-ability to escape planets gravity depends on how much planet food you're carrying. emptier tank = higher jump.
 
 harvest bots are obstacles walking each planet disable them by overpollinating the surface they walk on.
-the overgrowth will drain them and then consume their bodies
-they will do damage if you touch them.
+harvest flyers travel through space collecting free-floating energy, and will follow you to drain you if you get too close.
 
-Greeble Artifacts
-just to collect. nice to have. 
-give bonuses
-bonuses:
-increased fuel capacity
-increased jump strength (threshold is relative much food you have)
+babies!
+-completing a planet give you a baby planet soul.  
+-these trail you/orbit you, and actively attack nearby harvester bots on planets and in space
 
 no shooting! (unless it becomes apparent after implementation of mechanics that its not fun)
-DUN fuel is auto-collected by proxixmity. 
-DUN fuel chunk asteroids will shrink as you consume them.
+
 
 
 TODO:  Prioritized
-DUN Fuel Capacity Ceiling,
-Fuel capicity increase powerup
-DUN World Edges -player can't leave the world
 
-Player drawing:
-Improve leg motion on planet
-DUN hand jets when moving 'down'
-DUN hand jet from left or right when turning
+Smaller world.
+world reset function
+energy bar is always draining
+completed planets refill energy bar when flying near
+completing planets grants you a baby
+babies orbit you
+  babies attack nearby harvesters
+  babies respawn in orbit around you if offscreen
+giant flying drones
+  giant flying drones follow you around
+  giant flying drones drain your energy when close enough
 
-Enemy planet rovers
-  DUN-roam the perimeter of the planet. Proximity drains pollen from you. 
-  -if a planet is left underpollinated, the rovers will drain the pollinated sectors.
-  -completing a planet destroys the rovers on it.
+level complete transition
+tutorial worlds
 
-player-enemy interaction
- DUN -proximity to enemy rovers drains pollen from you.
- DUN draw red 'lasers' when you're close to an enemy rover
-  -can head-bounce enemy rovers to temporarily stun them.
-   while stunned they will not drain pollen from you.
+Visuals
+  player
+  Improve leg motion on planet
+
+DUN -proximity to enemy rovers drains pollen from you.
+  DUN draw red 'lasers' when you're close to an enemy rover
 
 sound design:
-  -music is expanded upon, more melody
-  DUN-sector complete sound
-  DUN-collide with harvester drone sound
-  DUN -pollen drain sound -loop
-  -fuel chunk destroyed sound
-  -fuel dot collect sound
-  DUN-player jets sound -loop
-  DUN-planet complete jingle
-
-fuel rock interaction improvement:
-  -fuel rocks will shrink as you destroy them
-  -on destruction fuel rocks spawn fuel dots to be collected. 
-
-planet completion improvement:
-  DUN -when sectors complete, they change in appearance.  -fuel chunks are placed in world with no overlap
-
+  music is expanded upon, more melody
 
 intelligent entity placement
-   DUN -planets are placed in world with no overlap
+  DUN -planets are placed in world with no overlap
 
 */
 
 
 w = Math.floor(innerWidth/4);
 h = Math.floor(innerHeight/4);
-wwFactor = 30;
-hhFactor = 30;
+wwFactor = 10;
+hhFactor = 10;
 Ww = w * wwFactor;
 Wh = h * hhFactor;
 view = {
@@ -121,9 +101,7 @@ atlasImage.onload = function(){
   let ctx = c.getContext('2d');
   ctx.drawImage(this, 0, 0);
   atlas = new Uint32Array( ctx.getImageData(0,0,64, 64).data.buffer );
-  console.log(atlas);
   window.r = new RetroBuffer(w, h, atlas, 10);
-  console.log(window.r);
   gameInit();
 };
 
@@ -158,33 +136,41 @@ darkness = 0;
 absorbSound = {};
 harverterSuckSound = {};
 sectorFillSound = {};
+gameMusicSound = 0;
 minimapToggle = false;
 
 function initGameData(){
 
-  for(let i = 0; i < 1500; i++){
-    Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
-  }
+  let pl = new Planet();
+  pl.x = p.x - 100;
+  pl.y = p.y - 100;
 
-  for(let i = 0; i < 2000; i++){
-    let p = new Planet();
-    p.x = Math.floor( Math.random()*(Ww-h*2)+h); //spawn planets not too close to edge of world
-    p.y = Math.floor(Math.random()*(Ww-h*2)+h);
-    p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2); // radius of planet, no bigger than roughly 80% of screen height
-    p.field = p.radius + 45;
-    let c = Math.floor(Math.random()*(55));
-    p.color = c;
-    collides = true;
-    tries = 6000;
-    while(collides && tries--){
-      p.x = Math.floor(Math.random()*(Ww));
-      p.y = Math.floor(Math.random()*(Wh));
-      p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2);  // radius of planet, no bigger than 2/3 of screen height
-      p.field = p.radius + 45;
-      collides = planets.some(planetInArray =>{return planetCollision(p, planetInArray)})
-    }
-    if(!collides){planets.push(p)}
-  }
+  planets.push(pl);
+
+
+  // for(let i = 0; i < 1500; i++){
+  //   Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
+  // }
+
+  // for(let i = 0; i < 2000; i++){
+  //   let p = new Planet()
+  //   p.x = Math.floor( Math.random()*(Ww-h*2)+h); //spawn planets not too close to edge of world
+  //   p.y = Math.floor(Math.random()*(Ww-h*2)+h);
+  //   p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2); // radius of planet, no bigger than roughly 80% of screen height
+  //   p.field = p.radius + 45;
+  //   let c = Math.floor(Math.random()*(55));
+  //   p.color = c;
+  //   collides = true;
+  //   tries = 6000;
+  //   while(collides && tries--){
+  //     p.x = Math.floor(Math.random()*(Ww));
+  //     p.y = Math.floor(Math.random()*(Wh));
+  //     p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2);  // radius of planet, no bigger than 2/3 of screen height
+  //     p.field = p.radius + 45;
+  //     collides = planets.some(planetInArray =>{return planetCollision(p, planetInArray)})
+  //   }
+  //   if(!collides){planets.push(p)}
+  // }
 
   for(let i = 0; i < 10000; i++){
     stars.push({
@@ -202,14 +188,14 @@ function initGameData(){
   }
 
 
-  for(let i = 0; i < 100; i++){
-    artifacts.push(new Artifact(
-      Math.floor(Math.random()*(Ww)), 
-      Math.floor(Math.random()*(Wh)),
-      Math.floor(Math.random()*(20)),
-      Math.floor(Math.random()*(63))
-    ));
-  }
+  // for(let i = 0; i < 100; i++){
+  //   artifacts.push(new Artifact(
+  //     Math.floor(Math.random()*(Ww)), 
+  //     Math.floor(Math.random()*(Wh)),
+  //     Math.floor(Math.random()*(20)),
+  //     Math.floor(Math.random()*(63))
+  //   ));
+  // }
   //populate buffer with something to fill planets with
   r.renderTarget = r.PAGE_2;
   r.pal = r.palDefault;
@@ -242,7 +228,6 @@ function initGameData(){
 }
 
 function initAudio(){
-  console.log('audio initializing');
   audioCtx = new AudioContext;
   audioMaster = audioCtx.createGain();
   compressor = audioCtx.createDynamicsCompressor();
@@ -339,9 +324,11 @@ function drawHUD(){
 */
 function updateGame(){
   t+=1;
-  absorbSound.volume.gain.value = 0;
-  harverterSuckSound.volume.gain.value = 0;
-  sectorFillSound.volume.gain.value = 0;
+  try{
+    absorbSound.volume.gain.value = 0;
+    harverterSuckSound.volume.gain.value = 0;
+    sectorFillSound.volume.gain.value = 0;
+  } catch { }
 
   view.x = p.x - mw;
   view.y = p.y - mh;
@@ -361,7 +348,9 @@ function updateGame(){
   if(Key.justReleased(Key.m)){
     minimapToggle = !minimapToggle;
   }
-  
+  if(Key.justReleased(Key.r)){
+    resetGame();
+  }
 }
 
 function drawGame(){
@@ -393,6 +382,22 @@ function drawGame(){
 
 }
 
+function resetGame(){
+  window.t = 1;
+  splodes = [];
+  planets = [];
+  sndData = [];
+  Fuelrocks = [];
+  planetSectors = [];
+  harvesters = [];
+  stars = [];
+  collected = [];
+  artifacts = [];
+  r.pat = r.dither[0];
+  initGameData();
+  gamestate = 0;
+}
+
 function titlescreen(){
   r.clear(0, r.PAGE_1);
   r.renderTarget = r.PAGE_1;
@@ -407,7 +412,8 @@ function titlescreen(){
     initAudio();
     started = true;
     }else {
-      playSound(sounds.song, 1,0,0.3, true);
+      if(gameMusicSound){gameMusicSound.sound.stop()};
+      gameMusicSound = playSound(sounds.song, 1,0,0.3, true);
       absorbSound = playSound(sounds.absorbray, 1, 0, 0.1, true);
       absorbSound.volume.gain.value = 0;
       harverterSuckSound = playSound(sounds.absorbray, 0.5, 0, 0.1, true);
@@ -417,10 +423,10 @@ function titlescreen(){
       gamestate = 1;
     }
   }; 
-
+  audioTxt = "CLICK TO INITIALIZE\nGENERATION SEQUENCE";
   if(soundsReady == totalSounds){
-    audioTxt="ALL SOUNDS RENDERED.\nCLICK OR PRESS UP/W/Z TO CONTINUE";
-  } else if (soundsReady > 0){
+    audioTxt="ALL SOUNDS RENDERED.\nPRESS UP/W/Z TO CONTINUE";
+  } else if (started){
     audioTxt = "SOUNDS RENDERING... " + soundsReady;
   } else {
     audioTxt = "CLICK TO INITIALIZE\nGENERATION SEQUENCE";
@@ -454,7 +460,7 @@ onclick=e=>{
           initGameData();
           initAudio();
           started = true;
-        }else if(soundsReady == totalSounds) {gamestate = 1;playSound(sounds.song, 1,0,0.3, true);}
+        }
       break;
       case 1: // react to clicks on screen 1
       case 2: // react to clicks on screen 2

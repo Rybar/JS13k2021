@@ -1,5 +1,5 @@
 import Splode from "./splode";
-import { Key, choice, playSound } from "./utils";
+import { Key, choice, playSound } from "./core/utils";
 
 /*
 TODO: implement double jump or thrust after jump to escape from gravity

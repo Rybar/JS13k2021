@@ -1,5 +1,5 @@
 import Splode from './splode.js';
-import { inView, choice, playSound} from './utils.js';
+import { inView, choice, playSound} from './core/utils.js';
 import Sector from './sector.js';
 import Harvester from './harvester.js';
 
@@ -7,7 +7,7 @@ import Harvester from './harvester.js';
 function Planet(){
     this.x = 0;
     this.y = 0;
-    this.radius = 5;
+    this.radius = 25;
     this.field = this.radius + 30;
     this.color = 22;
     this.haloColor = 19;
@@ -61,6 +61,20 @@ Planet.prototype.draw = function(){
             r.fillCircle(this.x - view.x, this.y - view.y, this.radius+3, this.haloColor);
             r.fillCircle(this.x - view.x, this.y - view.y, this.radius+2, this.haloColor+1);
 
+            if(this.reaching){
+                p.fuel += 0.1;
+                r.pat = r.dither[12]
+                let i = 10;
+                while(i--){
+                r.line(this.x - view.x + (Math.random()-0.5) * this.radius*2,
+                        this.y - view.y + (Math.random()-0.5) * this.radius*2,
+                            p.x - view.x,
+                            p.y - view.y,
+                            18+Math.random()*4);
+                }
+                r.pat = r.dither[0];
+            }
+
         }
         
         r.pat = r.dither[0];
@@ -92,7 +106,7 @@ Planet.prototype.update = function(){
             this.haloColor=choice([18,15,29]);
             this.sectors = Math.round(this.radius/10);
             this.sectorsRemaining = this.sectors;
-            this.harvesters = Math.round(this.sectors/2);
+            
             for(let i = 0; i < this.sectors; i++){
                 let x = this.x + this.radius * Math.cos(i*(2*Math.PI)/this.sectors);
                 let y = this.y + this.radius * Math.sin(i*(2*Math.PI)/this.sectors);
@@ -133,6 +147,9 @@ Planet.prototype.update = function(){
         let disty = this.y - p.y;
 
         let dist = Math.sqrt(distx*distx + disty*disty);
+        if( dist <= this.field + p.radius +50){
+            this.reaching = true;
+        }
         if( dist <= this.field + p.radius ){
 
             if(!p.withinPlanetGravity){

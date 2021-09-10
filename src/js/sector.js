@@ -1,4 +1,4 @@
-import { inView, playSound } from './utils.js';
+import { inView, playSound } from './core/utils.js';
 import Splode from './splode.js';
 
 function Sector(x,y, planet){
