@@ -2,6 +2,7 @@ import { inView, playSound, lerp, choice } from './core/utils.js';
 import Splode from './splode.js';
 const HOME = 0;
 const SEEKING = 1;
+const ORBITING = 3;
 const ATTACKING = 2;
 
 function Baby(x,y){
@@ -30,6 +31,7 @@ Baby.prototype.draw = function(){
         
         switch(this.state){
             case HOME:
+            case ORBITING:
                 r.fillCircle(this.x-view.x, this.y-view.y, 2, 0);
                 r.circle(this.x-view.x, this.y-view.y, 2, choice([19,20,22]) );
                 splodes.push( new Splode(this.x, this.y, 5, choice([19,20,22]) ) ); 
@@ -50,6 +52,7 @@ Baby.prototype.update = function(){
 
     if(!inView(this, 20)){
         this.state = HOME;
+        
     }
 
     this.targetAngle += 0.015;
@@ -59,6 +62,9 @@ Baby.prototype.update = function(){
         this.state = ATTACKING;
     }else if(p.enemiesInView.length == 0) {
         this.state = HOME;
+        if(p.withinPlanetGravity){
+            this.state = ORBITING;
+        }
     }
 
     switch(this.state){
@@ -67,7 +73,11 @@ Baby.prototype.update = function(){
             this.targetX = p.x + Math.cos(this.angle) * (p.radius + 7+babies.length-p.xVel*2); 
             this.targetY = p.y + Math.sin(this.angle) * (p.radius + 7+babies.length-p.yVel*2);
             
-            
+        break;
+
+        case ORBITING:
+            this.targetX = p.planet.x + Math.cos(this.angle) * (p.planet.radius + 7+babies.length-p.xVel*2); 
+            this.targetY = p.planet.y + Math.sin(this.angle) * (p.planet.radius + 7+babies.length-p.yVel*2);
         break;
 
         case ATTACKING:

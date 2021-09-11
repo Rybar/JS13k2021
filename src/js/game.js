@@ -44,23 +44,22 @@ TODO:  Prioritized
 
 giant flying drones
   giant flying drones are damaged by complete planets
-  babies attack drones
 
 dead planets become flying drones?  
 
 balance
   tighten up controls
   find goldilocks zone for planet spawn density
-  how to spawn drones?
-  -pick a a planet of given radius and replace it
-  
+  more drones
+  more small planets with no harvesters near player at start  
 
 tutorial area: middle of screen
   3 small planets with no drones and enough fuel to complete at least 1,
   1 planet with harvester
   tut text objects explaining mechanics? 
 
-Visuals
+Visuals/polish
+
   harvesters
     change drawing to pointy triangle with tiny eye
     legs?
@@ -69,10 +68,10 @@ Visuals
     greeble around the outside, black and red
   player
     Improve leg motion on planet
-  nebulae
+
+  nebulae/star clusters
     -different colors put in behind planets after init
     -evil colored nebulae/stars near drone spawnpoints
-    -if space allows, put other colors back in palette
 
   improved/more varied planet drawiing
    -simple lighting?
@@ -159,8 +158,11 @@ harverterSuckSound = {};
 sectorFillSound = {};
 gameMusicSound = 0;
 minimapToggle = false;
+procGenStart = 5;
 
 function initGameData(){
+
+  //hand placed items as tutorial area---------------------------------
 
   let pl = new Planet();
   pl.x = p.x - 100;
@@ -171,17 +173,19 @@ function initGameData(){
   pl = new Planet;
   pl.x = p.x + 200;
   pl.y = p.y - 100;
-  pl.radius = 40;
-  pl.harvesters = 2;
+  pl.radius = 25;
+  pl.color = 4;
+  pl.harvesters = 0;
 
   planets.push(pl);
 
-  let d = new Drone();
-  d.x = p.x + 400;
-  d.y = p.y;
-  d.radius = 25;
-  drones.push(d);
+  // let d = new Drone();
+  // d.x = p.x + 400;
+  // d.y = p.y;
+  // d.radius = 25;
+  // drones.push(d);
 
+//---------------------------------------------------------------------
 
   
 
@@ -202,8 +206,8 @@ function initGameData(){
     }
     else{planets.push(p)};
   }
-  for(let i = 0; i < 150; i++){
-    let replacePlanet = choice(planets);
+  for(let i = 0; i < 150; i++){  
+    let replacePlanet = planets[procGenStart + Math.floor(Math.random()*(planets.length-procGenStart))]; 
     let d = new Fuel(0,0,1);
     d.x = replacePlanet.x;
     d.y = replacePlanet.y;
@@ -213,7 +217,7 @@ function initGameData(){
     Fuelrocks.push(d);
   }
   for(let i = 0; i < 50; i++){
-    let replacePlanet = choice(planets);
+    let replacePlanet = planets[procGenStart + Math.floor(Math.random()*(planets.length-procGenStart))];
     let d = new Drone();
     d.x = replacePlanet.x;
     d.y = replacePlanet.y;
@@ -252,12 +256,25 @@ function initGameData(){
   //     c: Math.floor(Math.random()*(3))
   //   });
   // }
+
+  //Green stardust behind fuel rocks
   Fuelrocks.forEach(function(f){
     let star = [];
     for(let j = 0; j < 300; j++){ 
       let sx = f.x + Math.cos(Math.random()*Math.PI*2)*Math.random()*100;
       let sy = f.y + Math.sin(Math.random()*Math.PI*2)*Math.random()*100;
       star.push({x:sx, y:sy, c:choice([14,15,16])});  
+    }
+    stars.push({x:f.x, y:f.y, star:star});
+  });
+
+ //red stardust behind drones
+  drones.forEach(function(f){
+    let star = [];
+    for(let j = 0; j < 300; j++){ 
+      let sx = f.x + Math.cos(Math.random()*Math.PI*2)*Math.random()*150;
+      let sy = f.y + Math.sin(Math.random()*Math.PI*2)*Math.random()*150;
+      star.push({x:sx, y:sy, c:choice([3,4,5])});  
     }
     stars.push({x:f.x, y:f.y, star:star});
   });

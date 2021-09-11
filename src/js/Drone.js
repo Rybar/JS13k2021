@@ -72,7 +72,7 @@ Drone.prototype.update = function(){
     if(inView(this, -20)){
         p.enemiesInView.push(this);
     }
-    if(inView(this, 10)){
+    if(inView(this, 60)){
         this.targetX = p.x;
         this.targetY = p.y;
         this.x = lerp(this.x, this.targetX, 0.005);
@@ -96,12 +96,13 @@ Drone.prototype.update = function(){
 
         let dist = Math.sqrt(distx*distx + disty*disty);
 
-        if( dist <= this.radius + p.radius + 20){
+        if( dist <= this.radius + p.radius + 100){
                 p.fuel -= 0.6;
                 this.reaching = true;
+                p.draining = true;
                 harverterSuckSound.volume.gain.value = 0.1;
                 if(dist <= this.radius + p.radius){
-                    
+                    p.fuel -= 150;
                     if(Math.abs(p.xVel + p.yVel)/2 < 2){
                         if(p.fuel > 100){
 
@@ -126,7 +127,7 @@ Drone.prototype.update = function(){
                     
 
                 } 
-        }else {this.reaching = false;}
+        }else {this.reaching = false; p.draining = false;}
         if(this.health <= 0){
             this.alive = false;
             drones.splice(drones.indexOf(this), 1);

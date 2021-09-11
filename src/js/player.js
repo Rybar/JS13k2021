@@ -24,18 +24,20 @@ Player = {
     armThrust: 0,
     legThrust: 0,
     planetAngle: 0,
-    runSpeed: 2.5,
-    turnSpeed: 0.1,
+    runSpeed: 2.1,
+    turnSpeed: 0.15,
     baseJumpSpeed: 2.7,
     jumpSpeed: 2.7,
     jumpSpeedIncrement: 0.4,
     thrust: 0.1,
     yVel: 0,
     xVel: 0,
-    maxXVel: 4,
-    maxYVel: 4,
+    maxXVel: 3.5,
+    maxYVel: 3.5,
     fuel: 150,
     maxFuel: 300,
+    fuelDecay: 0.025,
+    draining: false,
     div12: Math.PI/6,
     forwardX: 0,
     forwardy: 0,
@@ -102,15 +104,15 @@ Player = {
         r.line(neckx, necky, arm1x, arm1y, 22); //arm1
         r.line(neckx, necky, arm2x, arm2y, 22); //arm2
 
-        // if(this.fuel > 100){
+        if(this.draining){
             
-        //     for(let i = 0; i < this.fuel-100; i++){
-        //         let ra = Math.random()*2*Math.PI;
-        //         r.pset( sx + Math.cos(ra) * (this.radius + 5 + Math.random()*5),
-        //                 sy + Math.sin(ra) * (this.radius + 5 + Math.random()*5),
-        //                 9)
-        //     }
-        // }
+            for(let i = 0; i < 100; i++){
+                let ra = Math.random()*2*Math.PI;
+                r.pset( sx + Math.cos(ra) * (this.radius + 5 + Math.random()*5),
+                        sy + Math.sin(ra) * (this.radius + 5 + Math.random()*5),
+                        choice([3,4]))
+            }
+        }
 
 
 
@@ -128,7 +130,7 @@ Player = {
      },
 
     update: function(){
-        this.fuel -= 0.005;
+        this.fuel -= this.fuelDecay;
         if(!this.init){
             this.jetnoise = playSound(sounds.jet, 0.6, 0, 0.1, true);
             this.jetnoise.volume.gain.value = 0;
@@ -204,15 +206,6 @@ Player = {
 
         if(Key.isDown(Key.UP) || Key.isDown(Key.z) || Key.isDown(Key.w) ){ this.moveUp() }
         else if(Key.isDown(Key.DOWN) || Key.isDown(Key.w) ){ this.moveDown() }
-
-        // if(Key.justReleased(Key.SPACE)){
-        //     for(let i = 10; i > 0; i--){
-        //     splodes.push(new Splode(p.x+Math.random()*20-10, p.y+Math.random()*20-10, Math.random()*70, 20*Math.random()*5) );
-        //     }
-        //     playSound(sounds.cellComplete)
-            
-        // }
-        
 
     },
 
