@@ -1,4 +1,4 @@
-import { inView } from './core/utils.js';
+import { inView, lerp } from './core/utils.js';
 import Splode from './splode.js';
 
 function Fuel(x,y, radius){
@@ -7,7 +7,9 @@ function Fuel(x,y, radius){
     this.radius = radius;
     this.alive = true
     this.reaching = false;
-    
+    this.targetX = 0;
+    this.targetY = 0;
+
 
     return this;
 }
@@ -34,7 +36,11 @@ Fuel.prototype.draw = function(){
 Fuel.prototype.update = function(){
     
     if(inView(this, 10)){
-
+        if(this.targetX > 0){
+            this.x = lerp(this.x, this.targetX, 0.2);
+            this.y = lerp(this.y, this.targetY, 0.2);
+        }
+        
         let distx = this.x - p.x;
         let disty = this.y - p.y;
 

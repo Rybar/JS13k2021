@@ -446,7 +446,7 @@ var RetroBuffer = function(width, height, atlas, pages){
     }
   
     this.imageData.data.set(this.buf8);
-  
+    this.c.width = this.c.width;
     this.ctx.putImageData(this.imageData, 0, 0);
   
   }

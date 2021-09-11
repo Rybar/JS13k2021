@@ -8,13 +8,14 @@ import boom1 from './sounds/boom1.js';
 import jet from './sounds/jet.js';
 import sectorget from './sounds/sectorget.js';
 import bump from './sounds/bump.js';
-import { playSound, Key, choice, inView, planetCollision } from './core/utils.js';
+import { playSound, Key, choice, inView, doesPlanetHaveCollision } from './core/utils.js';
 //import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
 import Baby from './baby.js';
 import Artifact from './artifact.js';
 import Fuel from './fuel.js';
+import Drone from './Drone.js';
 window.baby = Baby;
 //stats = new Stats();
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -41,30 +42,54 @@ no shooting! (unless it becomes apparent after implementation of mechanics that 
 
 TODO:  Prioritized
 
-Smaller world.
-world reset function
-energy bar is always draining
-completed planets refill energy bar when flying near
-completing planets grants you a baby
-babies orbit you
-  babies attack nearby harvesters
-  babies respawn in orbit around you if offscreen
 giant flying drones
-  giant flying drones follow you around
-  giant flying drones drain your energy when close enough
+  giant flying drones are damaged by complete planets
+  babies attack drones
 
-level complete transition
-tutorial worlds
+dead planets become flying drones?  
+
+balance
+  tighten up controls
+  find goldilocks zone for planet spawn density
+  how to spawn drones?
+  -pick a a planet of given radius and replace it
+  
+
+tutorial area: middle of screen
+  3 small planets with no drones and enough fuel to complete at least 1,
+  1 planet with harvester
+  tut text objects explaining mechanics? 
 
 Visuals
+  harvesters
+    change drawing to pointy triangle with tiny eye
+    legs?
+    show being hurt by baby attacks
+  drones
+    big eyeball follows player around
+    greeble around the outside, black and red
+  babies
+    trails or glow effect of some kind
+    change color when attacking
   player
-  Improve leg motion on planet
+    Improve leg motion on planet
+  nebulae
+  more stars without slowdown - clusters?
+    -different colors put in behind planets after init
+    -green nebulae /stars around fuel pods
+    -evil colored nebulae/stars near drone spawnpoints
+    -if space allows, put other colors back in palette
 
-DUN -proximity to enemy rovers drains pollen from you.
-  DUN draw red 'lasers' when you're close to an enemy rover
+  improved/more varied planet drawiing
+   -simple lighting?
+
+
 
 sound design:
   music is expanded upon, more melody
+  baby attack sound
+  harvester hurt sound
+  drone hurt sound
 
 intelligent entity placement
   DUN -planets are placed in world with no overlap
@@ -124,6 +149,7 @@ harvesters = [];
 stars = [];
 collected = [];
 babies = [];
+drones = [];
 
 
 artifacts = [];
@@ -156,29 +182,50 @@ function initGameData(){
 
   planets.push(pl);
 
+  let d = new Drone();
+  d.x = p.x + 400;
+  d.y = p.y;
+  d.radius = 25;
+  drones.push(d);
 
-  for(let i = 0; i < 100; i++){
-    Fuelrocks.push(new Fuel(Math.random()*Ww, Math.random()*Wh, Math.random()*10));
-  }
 
-  for(let i = 0; i < 1000; i++){
+  
+
+  for(let i = 0; i < 800; i++){
     let p = new Planet()
-    p.x = Math.floor( Math.random()*(Ww-h*2)+h); //spawn planets not too close to edge of world
-    p.y = Math.floor(Math.random()*(Ww-h*2)+h);
-    p.radius = Math.min(Math.floor(Math.random()*h/2*.9+20), h/2); // radius of planet, no bigger than roughly 80% of screen height
+    p.x = Math.floor( Math.random()*(Ww-w*2)+h); //spawn planets not too close to edge of world
+    p.y = Math.floor( Math.random()*(Wh-h*2)+h);
+
+    let radius = Math.min(Math.floor(Math.random()*h/3*.9+20), h/3);
+    p.radius = radius;
+    p.field = radius + 45;
     p.harvesters = 1 + Math.floor(Math.random()*5);
     let c = Math.floor(Math.random()*(55));
     p.color = c;
     collides = true;
-    tries = 6000;
-    while(collides && tries--){
-      p.x = Math.floor(Math.random()*(Ww));
-      p.y = Math.floor(Math.random()*(Wh));
-      p.radius = Math.max(p.radius--, 15);  // radius of planet, no bigger than 2/3 of screen height
-      p.field = p.radius + 45;
-      collides = planets.some(planetInArray =>{return planetCollision(p, planetInArray)})
+    if(doesPlanetHaveCollision(p, 200)){
+      continue;
     }
-    if(!collides){planets.push(p)}
+    else{planets.push(p)};
+  }
+  for(let i = 0; i < 150; i++){
+    let replacePlanet = choice(planets);
+    let d = new Fuel(0,0,1);
+    d.x = replacePlanet.x;
+    d.y = replacePlanet.y;
+    d.radius = 10+Math.random()*10;
+    planets.splice(planets.indexOf(replacePlanet), 1);
+    
+    Fuelrocks.push(d);
+  }
+  for(let i = 0; i < 50; i++){
+    let replacePlanet = choice(planets);
+    let d = new Drone();
+    d.x = replacePlanet.x;
+    d.y = replacePlanet.y;
+    d.radius = 15 + Math.random()*15;
+    planets.splice(planets.indexOf(replacePlanet), 1);
+    drones.push(d);
   }
 
   for(let i = 0; i < 10000; i++){
@@ -348,6 +395,7 @@ function updateGame(){
   planetSectors.forEach(e=>e.update());
   harvesters.forEach(e=>e.update());
   babies.forEach(e=>e.update());
+  drones.forEach(e=>e.update());
   p.update();
   pruneDead(splodes);
   pruneDead(artifacts);
@@ -355,6 +403,7 @@ function updateGame(){
   pruneDead(planetSectors);
   pruneDead(harvesters);
   pruneDead(babies);
+  pruneDead(drones);
   pruneScreen(p.enemiesInView);
   pruneDead(p.enemiesInView);
 
@@ -367,7 +416,7 @@ function updateGame(){
 }
 
 function drawGame(){
-  r.pal = r.brightness.slice(64*darkness, 64*darkness + 64);
+  r.pal = r.brightness;
   r.clear(0, r.PAGE_1);
   r.renderTarget = r.PAGE_1;
   
@@ -379,10 +428,14 @@ function drawGame(){
   Fuelrocks.forEach(e=>e.draw());
   planetSectors.forEach(e=>e.draw());
   planets.forEach(e=>e.draw());
-  splodes.forEach(e=>e.draw());
   artifacts.forEach(e=>e.draw());
   harvesters.forEach(e=>e.draw());
+  drones.forEach(e=>e.draw());
+  splodes.forEach(e=>e.draw());
   babies.forEach(e=>e.draw());
+
+
+
   
   p.draw();
 
@@ -408,6 +461,7 @@ function resetGame(){
   collected = [];
   artifacts = [];
   babies = [];
+  drones = [];
   r.pat = r.dither[0];
   initGameData();
   p.reset();

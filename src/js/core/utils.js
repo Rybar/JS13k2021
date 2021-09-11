@@ -15,6 +15,31 @@ export function planetCollision(circleA, circleB){
   return distance < circleA.field + circleB.field;
 }
 
+export function doesPlanetHaveCollision(planet, spaceBetween) {
+  for(var i = 0; i < planets.length; i++) {
+    var otherPlanet = planets[i];
+    var a = planet.field + otherPlanet.field + spaceBetween;
+    var x = planet.x - otherPlanet.x;
+    var y = planet.y - otherPlanet.y;
+
+    if (a >= Math.sqrt((x*x) + (y*y))) {
+      return true;
+    }
+  }
+  
+  if(planet.x + planet.field >= Ww ||
+     planet.x - planet.field <= 0) {
+    return true;
+  }
+    
+  if(planet.y + planet.field >= Wh ||
+      planet.y - planet.field <= 0) {
+    return true;
+  }
+  
+  return false;
+}
+
 export function inView(o, padding=0){
   return o.x - view.x + padding > 0 &&
          o.y - view.y + padding > 0 &&

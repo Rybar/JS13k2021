@@ -69,8 +69,8 @@ Planet.prototype.draw = function(){
                 while(i--){
                 r.line(this.x - view.x + (Math.random()-0.5) * this.radius*2,
                         this.y - view.y + (Math.random()-0.5) * this.radius*2,
-                            p.x - view.x,
-                            p.y - view.y,
+                            p.x - view.x + (Math.random()-0.5) * p.radius,
+                            p.y - view.y  + (Math.random()-0.5) * p.radius,
                             18+Math.random()*4);
                 }
                 r.pat = r.dither[0];

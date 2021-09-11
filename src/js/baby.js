@@ -27,8 +27,23 @@ function Baby(x,y){
 Baby.prototype.draw = function(){
     
     if(inView(this, 10)){
-        r.fillCircle(this.x-view.x, this.y-view.y, 2, 22);
+        
+        switch(this.state){
+            case HOME:
+                r.fillCircle(this.x-view.x, this.y-view.y, 2, 0);
+                r.circle(this.x-view.x, this.y-view.y, 2, choice([19,20,22]) );
+                splodes.push( new Splode(this.x, this.y, 5, choice([19,20,22]) ) ); 
+                break;
+            case ATTACKING:
+                r.fillCircle(this.x-view.x, this.y-view.y, 2, 0);
+                r.circle(this.x-view.x, this.y-view.y, 2, choice([5,6,7]) );
+                splodes.push( new Splode(this.x, this.y, 5, choice([5,6,7]) ) );
+                splodes.push( new Splode(this.enemyTarget.x+(Math.random()*2-1)*this.enemyTarget.radius,
+                                         this.enemyTarget.y+(Math.random()*2-1)*this.enemyTarget.radius, 5, choice([5,6,7]) ) );
+                break;
+        }
     }
+    
 
 }
 Baby.prototype.update = function(){
@@ -49,14 +64,15 @@ Baby.prototype.update = function(){
     switch(this.state){
 
         case HOME:
-            this.targetX = p.x + Math.cos(this.angle) * (p.radius + 7+babies.length-p.xVel); 
-            this.targetY = p.y + Math.sin(this.angle) * (p.radius + 7+babies.length-p.yVel); 
+            this.targetX = p.x + Math.cos(this.angle) * (p.radius + 7+babies.length-p.xVel*2); 
+            this.targetY = p.y + Math.sin(this.angle) * (p.radius + 7+babies.length-p.yVel*2);
+            
             
         break;
 
         case ATTACKING:
-            this.targetX = this.enemyTarget.x + Math.cos(this.angle) * 15;
-            this.targetY = this.enemyTarget.y + Math.sin(this.angle) * 15;
+            this.targetX = this.enemyTarget.x + Math.cos(this.angle) * (this.enemyTarget.radius + 5);
+            this.targetY = this.enemyTarget.y + Math.sin(this.angle) * (this.enemyTarget.radius + 5);
             this.enemyTarget.health -= 0.2;
             if(!this.enemyTarget.alive){
                 this.enemyTarget = choice(p.enemiesInView);
