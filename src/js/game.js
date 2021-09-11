@@ -66,17 +66,11 @@ Visuals
     legs?
     show being hurt by baby attacks
   drones
-    big eyeball follows player around
     greeble around the outside, black and red
-  babies
-    trails or glow effect of some kind
-    change color when attacking
   player
     Improve leg motion on planet
   nebulae
-  more stars without slowdown - clusters?
     -different colors put in behind planets after init
-    -green nebulae /stars around fuel pods
     -evil colored nebulae/stars near drone spawnpoints
     -if space allows, put other colors back in palette
 
@@ -191,7 +185,7 @@ function initGameData(){
 
   
 
-  for(let i = 0; i < 800; i++){
+  for(let i = 0; i < 1000; i++){
     let p = new Planet()
     p.x = Math.floor( Math.random()*(Ww-w*2)+h); //spawn planets not too close to edge of world
     p.y = Math.floor( Math.random()*(Wh-h*2)+h);
@@ -228,21 +222,45 @@ function initGameData(){
     drones.push(d);
   }
 
-  for(let i = 0; i < 10000; i++){
-    stars.push({
-      x: Math.floor(Math.random()*(Ww)), 
-      y: Math.floor(Math.random()*(Wh)),
-      c: Math.floor(Math.random()*(5))+18
-    });
-  }
-  for(let i = 0; i < 50000; i++){
-    stars.push({
-      x: Math.floor(Math.random()*(Ww)), 
-      y: Math.floor(Math.random()*(Wh)),
-      c: Math.floor(Math.random()*(3))
-    });
+  for(let i = 0; i < 5000; i++){
+    let star = [];
+    let x = Math.floor(Math.random()*Ww);
+    let y = Math.floor(Math.random()*Wh);
+    for(let j = 0; j < 10; j++){ 
+      let sx = x + (Math.random()-0.5)*100;
+      let sy = y + (Math.random()-0.5)*100;
+      star.push({x:sx, y:sy, c:Math.floor(Math.random()*(5))+18});
+    }
+    stars.push({x:x, y:y, star:star});
   }
 
+  for(let i = 0; i < 30000; i++){
+    let star = [];
+    let x = Math.floor(Math.random()*Ww);
+    let y = Math.floor(Math.random()*Wh);
+    for(let j = 0; j < 10; j++){ 
+      let sx = x + (Math.random()-0.5)*100;
+      let sy = y + (Math.random()-0.5)*100;
+      star.push({x:sx, y:sy, c:choice([30,31,43,1])});
+    }
+    stars.push({x:x, y:y, star:star});
+  }
+  // for(let i = 0; i < 50000; i++){
+  //   stars.push({
+  //     x: Math.floor(Math.random()*(Ww)), 
+  //     y: Math.floor(Math.random()*(Wh)),
+  //     c: Math.floor(Math.random()*(3))
+  //   });
+  // }
+  Fuelrocks.forEach(function(f){
+    let star = [];
+    for(let j = 0; j < 300; j++){ 
+      let sx = f.x + Math.cos(Math.random()*Math.PI*2)*Math.random()*100;
+      let sy = f.y + Math.sin(Math.random()*Math.PI*2)*Math.random()*100;
+      star.push({x:sx, y:sy, c:choice([14,15,16])});  
+    }
+    stars.push({x:f.x, y:f.y, star:star});
+  });
 
   // for(let i = 0; i < 100; i++){
   //   artifacts.push(new Artifact(
@@ -421,8 +439,10 @@ function drawGame(){
   r.renderTarget = r.PAGE_1;
   
   stars.forEach(function(e){
-    if(inView(e)){
-      r.pset(e.x - view.x, e.y-view.y, e.c);
+    if(inView(e, 100)){
+      e.star.forEach(function(s){
+        r.pset(s.x-view.x, s.y-view.y, s.c);
+      })
     }
   });
   Fuelrocks.forEach(e=>e.draw());
@@ -471,8 +491,15 @@ function resetGame(){
 function titlescreen(){
   r.clear(0, r.PAGE_1);
   r.renderTarget = r.PAGE_1;
-
-  splodes.forEach(splode=>{splode.draw()})
+  if(soundsReady == totalSounds){
+    stars.forEach(function(e){
+      if(inView(e, 100)){
+        e.star.forEach(function(s){
+          r.pset(s.x-view.x, s.y-view.y, s.c);
+        })
+      }
+    });
+  }
   //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
   r.text(["INTERSTELLAR\nPLANET POLLINATOR", w/2-2, 50, 3, 5, 'center', 'top', 3, 19]);
   r.text([audioTxt, w/2-2, 100, 1, 3, 'center', 'top', 1, 22]);

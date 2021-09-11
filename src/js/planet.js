@@ -86,7 +86,14 @@ Planet.prototype.draw = function(){
         r.pat = r.dither[8];
         this.disease.forEach(function(d){
             r.pat = r.dither[d.dither];
-            r.fillCircle(d.x - view.x, d.y - view.y, d.radius, 42);
+            let px = (d.x) 
+            let py = (d.y)
+            let rotatedX = px * Math.cos(3) - py * Math.sin(3);
+            let rotatedY = px * Math.sin(3) + py * Math.cos(3);
+            let newX = rotatedX + this.x - view.x;
+            let newY = rotatedY + this.y - view.y;
+            r.fillCircle(newX, newY, d.radius, 42);
+            //r.fillCircle(d.x - view.x, d.y - view.y, d.radius, 42);
         });
 
         //a bright cyan line to finish it off --dark red if its not pollinated
@@ -122,10 +129,10 @@ Planet.prototype.update = function(){
             for(let i = 0; i < 300; i++){
                 this.disease.push(
                     {
-                    x: this.x + Math.cos(Math.random()*3.14159*2) * Math.random()*this.radius,
-                    y: this.y + Math.sin(Math.random()*3.14159*2) * Math.random()*this.radius,
+                    x: Math.cos(Math.random()*3.14159*2) * Math.random()*this.radius,
+                    y: Math.sin(Math.random()*3.14159*2) * Math.random()*this.radius,
                     radius: Math.random()*12,
-                    dither: Math.floor(4+Math.random()*4)
+                    dither: Math.floor(8+Math.random()*4)
                     });
             }    
             this.populated = true;
