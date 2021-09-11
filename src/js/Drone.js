@@ -133,7 +133,7 @@ Drone.prototype.update = function(){
             splodes.push(new Splode(this.x, this.y, 50, 6));
             splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 60, 7));
             splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 70, 5));
-            for(let i = 0; i < m5; i++){
+            for(let i = 0; i < 5; i++){
                 let f = new Fuel(this.x, this.y, 2);
                 f.targetX = this.x + (Math.random()-0.5)*150;
                 f.targetY = this.y + (Math.random()-0.5)*150;
