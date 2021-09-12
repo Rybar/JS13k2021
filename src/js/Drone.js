@@ -131,6 +131,7 @@ Drone.prototype.update = function(){
         }else {this.reaching = false; p.draining = false;}
         if(this.health <= 0){
             this.alive = false;
+            p.draining = false;
             drones.splice(drones.indexOf(this), 1);
             splodes.push(new Splode(this.x, this.y, 50, 6));
             splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 60, 7));

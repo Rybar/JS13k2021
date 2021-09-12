@@ -58,6 +58,7 @@ Player = {
     jetnoise: {},
     babies:0,
     init: false,
+    absorbing: false,
     enemiesInView: [],
 
 

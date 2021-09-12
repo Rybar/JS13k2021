@@ -28,7 +28,7 @@ function Planet(){
 Planet.prototype.draw = function(){
    r.renderSource = r.PAGE_2;
 
-   if(inView(this, 2000) && !inView(this,50)){
+   if(inView(this, 2500) && !inView(this,50)){
         //radar HUD
         let ax = this.x - p.x,
             ay = this.y - p.y,
@@ -141,6 +141,7 @@ Planet.prototype.update = function(){
             this.drawColor = this.color;
             if(!this.completeFlag){
                 this.completeFlag = true;
+                planetsComplete++;
                 playSound(sounds.tada);
                 this.disease = [];
                 let i = 80;

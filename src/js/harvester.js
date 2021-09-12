@@ -52,41 +52,27 @@ Harvester.prototype.update = function(){
 
         if( dist <= this.radius + p.radius + 20){
                 p.fuel -= 0.6;
+                p.draining = true;
                 this.reaching = true;
                 harverterSuckSound.volume.gain.value = 0.1;
                 if(dist <= this.radius + p.radius){
                     
                     if(Math.abs(p.xVel + p.yVel)/2 < 2){
-                        if(p.fuel > 100){
-
-                            p.score += 1;
-                            this.hit = true;
-                            this.hitCount += 1;
-                            splodes.push(new Splode(this.x, this.y, 40, 5));
-                            playSound(sounds.boom1, 3, 0, 0.05, false);
-                            
-                            p.xVel = Math.cos(p.angle) * 3;
-                            p.yVel = Math.sin(p.angle) * 3;
-                        }else {
-                            splodes.push(new Splode(this.x, this.y, 20, 22));
-                            p.xVel = Math.cos(p.angle) * 5;
-                            p.yVel = Math.sin(p.angle) * 5;
-                            playSound(sounds.bump, 1, 0, 0.4, false);
-                        }
-                            
-                        
+                        splodes.push(new Splode(this.x, this.y, 20, 22));
+                        p.xVel = Math.cos(p.angle) * 4;
+                        p.yVel = Math.sin(p.angle) * 4;
+                        playSound(sounds.bump, 1, 0, 0.4, false);
                     }
-                    
-                    
-
                 } 
-        }else {this.reaching = false;}
+        }else {this.reaching = false; p.draining = false;}
         if(this.health < 100 && !this.attacked){
             playSound(sounds.harvestermoan);
             this.attacked = true;
         }
         if(this.health <= 0){
             this.alive = false;
+            p.draining = false;
+            this.planet.harvesters--;
             harvesters.splice(harvesters.indexOf(this), 1);
             splodes.push(new Splode(this.x, this.y, 50, 6));
             splodes.push(new Splode(this.x+Math.random()*5, this.y+Math.random()*5, 60, 7));

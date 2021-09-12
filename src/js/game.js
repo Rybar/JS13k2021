@@ -1,3 +1,71 @@
+/*
+TODO:  Prioritized
+
+tutorial area: middle of screen
+  3 small planets with no drones and enough fuel to complete at least 1,
+  1 planet with harvester
+  tut text objects explaining mechanics?
+
+mini-map and help text
+show 'M for Map' on gameplay screen
+show completed planets
+  as percentage or ratio
+show # of babies
+
+Credits!
+Herebefrogs for detailed feedback and game boilerplate
+Yarume for Roadroller
+Darthlupi for game design
+Soundbox creator for music/sound synth
+
+giant flying drones
+  giant flying drones are damaged by complete planets
+
+balance
+  tighten up controls
+  find goldilocks zone for planet spawn density
+  more drones
+  more small planets with no harvesters near player at start
+  weighted more tiny planets in general
+
+ 
+
+Visuals/polish
+
+  babies
+    alter orbit pattern to something more interesting than circle
+    visual/audio feedback for adding a baby to the collection
+
+  harvesters
+  shorten hurt sound
+  visual feedback for hurt
+    change drawing to pointy triangle with tiny eye
+    legs?
+
+  player
+    Improve leg motion on planet
+
+  nebulae/star clusters
+    -different colors put in behind planets after init
+    -denser than existing special star groups
+      drawn with dithered circles instead of points
+  
+  shooting stars
+
+  improved/more varied planet drawiing
+   -more stencil sheets with striations at different angles
+   -simple lighting?
+
+sound design:
+  music is expanded upon, more melody
+
+intelligent entity placement
+  DUN -planets are placed in world with no overlap
+
+
+
+*/
+
 import RetroBuffer from './core/RetroBuffer.js';
 import MusicPlayer from './musicplayer.js';
 
@@ -33,77 +101,20 @@ window.baby = Baby;
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 
 
-/*
-Interstellar Planet Pollinator
-collect resources to turn into planet food. 
-planets will have a different number of sectors to be pollinated depending on circumference.
-planet object will track sector pollination status
-pollinated: complete
-
-
-harvest bots are obstacles walking each planet disable them by overpollinating the surface they walk on.
-harvest flyers travel through space collecting free-floating energy, and will follow you to drain you if you get too close.
-
-babies!
--completing a planet give you a baby planet soul.  
--these trail you/orbit you, and actively attack nearby harvester bots on planets and in space
-
-no shooting! (unless it becomes apparent after implementation of mechanics that its not fun)
-
-
-
-TODO:  Prioritized
-
-giant flying drones
-  giant flying drones are damaged by complete planets
-
-dead planets become flying drones?  
-
-balance
-  tighten up controls
-  find goldilocks zone for planet spawn density
-  more drones
-  more small planets with no harvesters near player at start  
-
-tutorial area: middle of screen
-  3 small planets with no drones and enough fuel to complete at least 1,
-  1 planet with harvester
-  tut text objects explaining mechanics? 
-
-Visuals/polish
-
-  harvesters
-    change drawing to pointy triangle with tiny eye
-    legs?
-    show being hurt by baby attacks
-  drones
-    greeble around the outside, black and red
-  player
-    Improve leg motion on planet
-
-  nebulae/star clusters
-    -different colors put in behind planets after init
-    -evil colored nebulae/stars near drone spawnpoints
-
-  improved/more varied planet drawiing
-   -simple lighting?
-
-sound design:
-  music is expanded upon, more melody
-  baby attack sound
-  harvester hurt sound
-  drone hurt sound
-
-intelligent entity placement
-  DUN -planets are placed in world with no overlap
-
-*/
-
-
-w = Math.floor(innerWidth/3.5);
+if(innerWidth < 800){
+  w = innerWidth;
+h = innerHeight;
+}else if(innerWidth < 1300){
+  w = Math.floor(innerWidth/2);
+  h = Math.floor(innerHeight/2);
+}else  {
+  w = Math.floor(innerWidth/3.5);
 h = Math.floor(innerHeight/3.5);
-wwFactor = 35;
-hhFactor = 35;
+}
+
+
+wwFactor = 40;
+hhFactor = 40;
 Ww = w * wwFactor;
 Wh = h * hhFactor;
 view = {
@@ -155,20 +166,30 @@ babies = [];
 drones = [];
 
 
+
 artifacts = [];
 
+help= {
+playerControls: "ARROWS / ZQSD / WASD TO MOVE",
+completePlanets: "COMPLETE PLANETS\nTO GET MORE ENERGY",
+harvesters: "HARVESTERS CAN BE/\nKILLED BY PLANET SPRITES",
+
+}
 sounds = {};
 soundsReady = 0;
 totalSounds = 8;
 audioTxt = "";
 debugText = "";
 darkness = 0;
+planetsComplete = 0;
+planetsDiscovered = 0;
 absorbSound = {};
 harverterSuckSound = {};
 sectorFillSound = {};
 gameMusicSound = 0;
 minimapToggle = false;
 procGenStart = 5;
+helpToggle = false;
 
 function initGameData(){
 
@@ -382,27 +403,54 @@ function initAudio(){
 function drawMiniMap(){
   r.pal = r.palDefault
   r.fillRect(0,0,w,h,0);
+  let mapFactorW = wwFactor/3;
+  let mapFactorH = hhFactor/3;
+  view.x = p.x - mw*mapFactorW;
+  view.y = p.y - mh*mapFactorH;
+  let mapViewX = (view.x)/mapFactorW;
+  let mapViewY = (view.y)/mapFactorH;
+
+  r.pat = r.dither[8]
+  stars.forEach(function(e){
+    if(inView(e, mapFactorW*Ww)){
+      e.star.forEach(function(s){
+        r.pset(s.x/mapFactorW - mapViewX, s.y/mapFactorH-mapViewY, 1);
+      })
+    }
+  });
+  r.pat = r.dither[0];
 
   planets.forEach(function(p){
-    r.fillCircle(p.x/wwFactor, p.y/hhFactor, (p.radius/wwFactor)+1, p.sectorsRemaining==0?p.color:40);
+    r.fillCircle(
+      p.x/mapFactorW - mapViewX,
+      p.y/mapFactorH - mapViewY,
+      Math.max( (p.radius/mapFactorW), 2),
+      p.sectorsRemaining==0?p.color:2
+      );
     if(p.sectorsRemaining==0){
-      r.circle(p.x/wwFactor, p.y/hhFactor, (p.radius/wwFactor)+1, 19);
+      r.circle(p.x/mapFactorW - mapViewX, p.y/mapFactorH - mapViewY,  Math.max( (p.radius/mapFactorW), 2), 19);
     }
   });
 
-  // Fuelrocks.forEach(function(f){
-  //   r.pset(f.x/wwFactor, f.y/hhFactor, 2);
-  // });p.color
+  Fuelrocks.forEach(function(f){
+    r.pset(f.x/mapFactorW - mapViewX, f.y/mapFactorH - mapViewY, 8)
+  });
+  harvesters.forEach(function(f){
+    r.pset(f.x/mapFactorW - mapViewX, f.y/mapFactorH - mapViewY, 4)
+  });
+  drones.forEach(function(f){
+    r.fillCircle(f.x/mapFactorW - mapViewX, f.y/mapFactorH - mapViewY,  1, 4);
+  });
 
-  if(t%2==0){ r.pset(p.x/wwFactor, p.y/wwFactor, 9);
-  r.pset((p.x/wwFactor)+1, (p.y/wwFactor)+1, 22);
-  r.pset((p.x/wwFactor)-1, (p.y/wwFactor)-1, 22);
-  r.pset((p.x/wwFactor)-1, (p.y/wwFactor)+1, 22);
-  r.pset((p.x/wwFactor)+1, (p.y/wwFactor)-1, 22);
-  r.pset((p.x/wwFactor)+2, (p.y/wwFactor)+2, 22);
-  r.pset((p.x/wwFactor)-2, (p.y/wwFactor)-2, 22);
-  r.pset((p.x/wwFactor)-2, (p.y/wwFactor)+2, 22);
-  r.pset((p.x/wwFactor)+2, (p.y/wwFactor)-2, 22);
+  if(t%2==0){ r.pset(p.x/mapFactorW, p.y/mapFactorH, 9);
+  r.pset((p.x/mapFactorW)+1-mapViewX, (p.y/mapFactorH)+1-mapViewY, 22);
+  r.pset((p.x/mapFactorW)-1-mapViewX, (p.y/mapFactorH)-1-mapViewY, 22);
+  r.pset((p.x/mapFactorW)-1-mapViewX, (p.y/mapFactorH)+1-mapViewY, 22);
+  r.pset((p.x/mapFactorW)+1-mapViewX, (p.y/mapFactorH)-1-mapViewY, 22);
+  r.pset((p.x/mapFactorW)+2-mapViewX, (p.y/mapFactorH)+2-mapViewY, 22);
+  r.pset((p.x/mapFactorW)-2-mapViewX, (p.y/mapFactorH)-2-mapViewY, 22);
+  r.pset((p.x/mapFactorW)-2-mapViewX, (p.y/mapFactorH)+2-mapViewY, 22);
+  r.pset((p.x/mapFactorW)+2-mapViewX, (p.y/mapFactorH)-2-mapViewY, 22);
 }
 
 }
@@ -414,6 +462,50 @@ function drawHUD(){
   r.fillRect(w/4, 10, fuelBarWidth, 3, 12);
   
 }
+
+function drawHelp(){
+
+  playerHelpText = "W/Z/UP TO THRUST\nAD/QD TO TURN"
+ 
+  if(t%300<150 && p.fuel < 5){
+    playerHelpText = "FIND ENERGY MASS TO ABSORB\nOR TRAVEL NEAR COMPLETE PLANETS\nTO RECHARGE"
+  }
+  
+  if(p.withinPlanetGravity){
+
+    if(p.planet.sectorsRemaining>0){
+
+      if(p.planet.harvesters > 0){
+        playerHelpText = "THE RED CAN ONLY\nBE KILLED BY PLANET SPRITES"
+        
+      }else{
+        if(t%300<150){
+          playerHelpText =  "CHARGE UP PLANET NODES\nTO COMPLETE PLANETS"
+        } else {
+          playerHelpText="COMPLETING A PLANET GIVES\nYOU A PLANET SPRITE"
+        }
+      }
+    }else{
+      playerHelpText = "COMPLETED PLANETS RECHARGE\nYOUR ENERGY WHEN CLOSE"
+      if(t%300<150){
+        playerHelpText = "PLANET SPRITES FOLLOW YOU\nFOREVER AND ATTACK THE RED"
+      }
+    }
+  }
+
+  if(p.draining){
+    playerHelpText = "THE RED DRAIN YOUR ENERGIES\nKEEP YOUR DISTANCE"
+  }
+
+  r.text([playerHelpText, p.x-view.x, p.y-view.y+20, 1, 3, 'center', 'top', 1, 7]);
+  r.text(["ENERGY REMAINING", w/2, 15, 1, 3, 'center', 'top', 1, 7]);
+
+  r.pat = r.dither[12];
+  r.circle(mw, mh, mh-10, 7);
+  r.pat = r.dither[0];
+  r.text(["HUD INDICATES\nNEARBY PLANETS", mw+(mh), mh+mh/2, 1, 3, 'right', 'top', 1, 7]);
+}
+
 /*
   ______                                            ______     __                 __                         
  /      \                                          /      \   |  \               |  \                        
@@ -459,6 +551,9 @@ function updateGame(){
   if(Key.justReleased(Key.m)){
     minimapToggle = !minimapToggle;
   }
+  if(Key.justReleased(Key.h)){
+    helpToggle = !helpToggle;
+  }
   if(Key.justReleased(Key.r)){
     resetGame();
   }
@@ -492,6 +587,9 @@ function drawGame(){
 
   drawCollected();
   drawHUD();
+  if(helpToggle){ drawHelp(); }
+
+  r.text(["M MAP/STATS  H TOGGLE HELP", w-8, h-8, 1, 3, 'right', 'top', 1, 19]);
   r.renderSource = r.PAGE_1;
   r.renderTarget = r.SCREEN;
   r.sspr(0,0,w,h,0,0,w,h,false,false);
@@ -571,7 +669,7 @@ function titlescreen(){
   view.x = 0; view.y = 0;
   if(!this.titleInit){
     p.x = w/2-135;
-    p.y = h/2-70;
+    p.y = 70;
     p.bodyAngle = -Math.PI/3;
   
     for(let i = 0; i < 5; i++){ 
@@ -614,21 +712,29 @@ function titlescreen(){
       })
     }
   });
+
+
+  //purple planet horizon, using texture on page_2 made for planets in-game
   r.stencil = true;
   r.stencilSource = r.PAGE_2;
   r.stencilOffset = 27;
-  r.fillRect(0,h-60,w,60, 0);
+  r.fillRect(0,h-(h/10),w,h/10, 0);
   r.stencil = false;
+  r.line(0,h-(h/10),w,h-(h/10), 20);
   
-  
+  //draw player with orbiting babies next to SPACE
   p.draw();
   babies.forEach(e=>e.draw());
   babies.forEach(e=>e.update());
+
   //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
+  //hacky bevel around text by 1px offset in all directions
   r.text([" SPACE\nGARDEN", w/2-1, 50, 8, 10, 'center', 'top', 9, 12]);
   r.text([" SPACE\nGARDEN", w/2-3, 50, 8, 10, 'center', 'top', 9, 12]);
   r.text([" SPACE\nGARDEN", w/2-2, 51, 8, 10, 'center', 'top', 9, 15]);
   r.text([" SPACE\nGARDEN", w/2-2, 49, 8, 10, 'center', 'top', 9, 11]);
+
+  //draw the animated innards of the title letters
   r.stencil = true;
   r.stencilSource = r.PAGE_3;
   r.stencilOffset = 0;
@@ -636,6 +742,7 @@ function titlescreen(){
   r.stencil = false;
   r.text(["PRESS UP / W / Z TO PLAY", w/2-2, 170, 1, 1, 'center', 'top', 1, 22]);
   
+  //we're outside of the gameloop, so gotta clean up
   pruneDead(splodes);
 
   if(Key.justReleased(Key.UP) || Key.justReleased(Key.w) || Key.justReleased(Key.z)){
