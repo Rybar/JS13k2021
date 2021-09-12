@@ -13,6 +13,7 @@ function Harvester(angle, planet){
     this.reaching = false;
     this.angle = angle;
     this.planet = planet;
+    this.attacked = false;
 
     return this;
 }
@@ -80,6 +81,10 @@ Harvester.prototype.update = function(){
 
                 } 
         }else {this.reaching = false;}
+        if(this.health < 100 && !this.attacked){
+            playSound(sounds.harvestermoan);
+            this.attacked = true;
+        }
         if(this.health <= 0){
             this.alive = false;
             harvesters.splice(harvesters.indexOf(this), 1);

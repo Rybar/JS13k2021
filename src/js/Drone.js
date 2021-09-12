@@ -23,6 +23,7 @@ function Drone(angle, planet){
     this.browR = {x:0, y:0}
     this.armSpeedFactor = 60;
     this.armSpeedTarget = 0;
+    this.underAttack = false;
 
 
     return this;

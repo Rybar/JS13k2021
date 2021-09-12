@@ -1,5 +1,8 @@
 import RetroBuffer from './core/RetroBuffer.js';
 import MusicPlayer from './musicplayer.js';
+
+
+//sound assets
 import song from './sounds/song.js';
 import cellComplete from './sounds/cellComplete.js';
 import tada from './sounds/tada.js';
@@ -8,6 +11,13 @@ import boom1 from './sounds/boom1.js';
 import jet from './sounds/jet.js';
 import sectorget from './sounds/sectorget.js';
 import bump from './sounds/bump.js';
+import babyaction from './sounds/babyaction.js';
+import babyaction2 from './sounds/babyaction2.js';
+
+
+import dronemoan from './sounds/dronemoan.js';
+import harvestermoan from './sounds/harvestermoan.js';
+
 import { playSound, Key, choice, inView, doesPlanetHaveCollision } from './core/utils.js';
 //import Stats from './Stats.js';
 import Player from './player.js';
@@ -16,6 +26,8 @@ import Baby from './baby.js';
 import Artifact from './artifact.js';
 import Fuel from './fuel.js';
 import Drone from './Drone.js';
+import Splode from './splode.js';
+import { reset } from 'browser-sync';
 window.baby = Baby;
 //stats = new Stats();
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -75,8 +87,6 @@ Visuals/polish
 
   improved/more varied planet drawiing
    -simple lighting?
-
-
 
 sound design:
   music is expanded upon, more melody
@@ -314,8 +324,8 @@ function initGameData(){
     r.line(x, y, x+Math.random()*10, y+4, c);
   }
   r.pat = r.dither[0];
-  r.renderTarget = r.SCREEN;
 
+  r.renderTarget = r.SCREEN;
 }
 
 function initAudio(){
@@ -339,7 +349,11 @@ function initAudio(){
     {name:'jet', data: jet},
     {name:'absorbray', data: absorbray},
     {name:'sectorget', data: sectorget},
-    {name:'bump', data: bump}
+    {name:'bump', data: bump},
+    {name:'dronemoan', data: dronemoan},
+    {name:'harvestermoan', data: harvestermoan},
+    {name:'babyaction', data: babyaction},
+    {name:'babyaction2', data: babyaction2},
 
   ]
   totalSounds = sndData.length;
@@ -452,7 +466,7 @@ function updateGame(){
 
 function drawGame(){
   r.pal = r.brightness;
-  r.clear(0, r.PAGE_1);
+  r.clear(64, r.PAGE_1);
   r.renderTarget = r.PAGE_1;
   
   stars.forEach(function(e){
@@ -502,13 +516,16 @@ function resetGame(){
   r.pat = r.dither[0];
   initGameData();
   p.reset();
-  gamestate = 0;
+  this.triggered = false;
+  this.titleInit = false;
+  gameState = 2;
 }
 
-function titlescreen(){
-  r.clear(0, r.PAGE_1);
+function preload(){
+  r.clear(64, r.PAGE_1);
   r.renderTarget = r.PAGE_1;
   if(soundsReady == totalSounds){
+    view.x += 1;
     stars.forEach(function(e){
       if(inView(e, 100)){
         e.star.forEach(function(s){
@@ -517,8 +534,7 @@ function titlescreen(){
       }
     });
   }
-  //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
-  r.text(["INTERSTELLAR\nPLANET POLLINATOR", w/2-2, 50, 3, 5, 'center', 'top', 3, 19]);
+  
   r.text([audioTxt, w/2-2, 100, 1, 3, 'center', 'top', 1, 22]);
   if(Key.justReleased(Key.UP) || Key.justReleased(Key.w) || Key.justReleased(Key.z)){
     if(soundsReady == 0 && !started){
@@ -534,7 +550,7 @@ function titlescreen(){
       harverterSuckSound.volume.gain.value = 0;
       sectorFillSound = playSound(sounds.absorbray, 1.5, 0, 0.1, true);
       sectorFillSound.volume.gain.value = 0;
-      gamestate = 1;
+      gamestate = 2;
     }
   }; 
   audioTxt = "CLICK TO INITIALIZE\nGENERATION SEQUENCE";
@@ -551,6 +567,88 @@ function titlescreen(){
   r.render();
 }
 
+function titlescreen(){
+  view.x = 0; view.y = 0;
+  if(!this.titleInit){
+    p.x = w/2-135;
+    p.y = h/2-70;
+    p.bodyAngle = -Math.PI/3;
+  
+    for(let i = 0; i < 5; i++){ 
+      babies.push(new Baby(p.x, p.y));
+    }
+    this.titleInit = true;
+  }
+  //source for letter innards
+  r.renderTarget = r.PAGE_3;
+  r.fillRect(0,0,w,h, 14);
+  r.pat = r.dither[8];
+  r.fillRect(0,60,w,80, 15);
+  r.pat = r.dither[4];
+  r.fillRect(0,65,w,70, 15);
+  r.pat = r.dither[2];
+  r.fillRect(0,75,w,50, 15);
+  r.pat = r.dither[8];
+  r.fillRect(0,80,w,40, 16);
+  r.pat = r.dither[4];
+  r.fillRect(0,85,w,30, 16);
+  if(!this.triggered){
+    let i = 20;
+    while(i--){
+      let x = Math.random()*w;
+      let y = Math.random()*h;
+      splodes.push(new Splode(x, y, 20, 11));
+    }
+    splodes.forEach(e=>e.draw());
+    splodes.forEach(e=>e.update());
+  }
+  
+
+  r.clear(64, r.PAGE_1);
+  r.renderTarget = r.PAGE_1;
+
+  stars.forEach(function(e){
+    if(inView(e, 1000)){
+      e.star.forEach(function(s){
+        r.pset((s.x-view.x)/2, (s.y-view.y)/2, s.c);
+      })
+    }
+  });
+  r.stencil = true;
+  r.stencilSource = r.PAGE_2;
+  r.stencilOffset = 27;
+  r.fillRect(0,h-60,w,60, 0);
+  r.stencil = false;
+  
+  
+  p.draw();
+  babies.forEach(e=>e.draw());
+  babies.forEach(e=>e.update());
+  //[textstring, x, y, hspacing, vspacing, halign, valign, scale, color, offset, delay, frequency]
+  r.text([" SPACE\nGARDEN", w/2-1, 50, 8, 10, 'center', 'top', 9, 12]);
+  r.text([" SPACE\nGARDEN", w/2-3, 50, 8, 10, 'center', 'top', 9, 12]);
+  r.text([" SPACE\nGARDEN", w/2-2, 51, 8, 10, 'center', 'top', 9, 15]);
+  r.text([" SPACE\nGARDEN", w/2-2, 49, 8, 10, 'center', 'top', 9, 11]);
+  r.stencil = true;
+  r.stencilSource = r.PAGE_3;
+  r.stencilOffset = 0;
+  r.text([" SPACE\nGARDEN", w/2-2, 50, 8, 10, 'center', 'top', 9, 19]);
+  r.stencil = false;
+  r.text(["PRESS UP / W / Z TO PLAY", w/2-2, 170, 1, 1, 'center', 'top', 1, 22]);
+  
+  pruneDead(splodes);
+
+  if(Key.justReleased(Key.UP) || Key.justReleased(Key.w) || Key.justReleased(Key.z)){
+    p.reset();
+    gamestate = 1;
+  }
+ 
+  r.renderSource = r.PAGE_1;
+  r.renderTarget = r.SCREEN;
+  r.sspr(0,0,w,h,0,0,w,h,false,false);
+  r.render();
+
+}
 //initialize  event listeners--------------------------
 window.addEventListener('keyup', function (event) {
   Key.onKeyup(event);
@@ -613,14 +711,14 @@ function gameloop(){
   //stats.begin();
     switch(gamestate){
       case 0: //title screen
-        titlescreen();
+        preload();
         break;
       case 1: //game
         updateGame();
         drawGame();
         break;
       case 2: //game over
-        gameover();
+        titlescreen();
         break;
     }
     Key.update();

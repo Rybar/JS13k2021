@@ -10,6 +10,7 @@ function Baby(x,y){
     
 
     this.state = 0;
+    this.previousState = 0;
     this.angle = 0;
     this.targetAngle = 0;
 
@@ -50,13 +51,16 @@ Baby.prototype.draw = function(){
 }
 Baby.prototype.update = function(){
 
+    if(this.state != this.previousState){
+        //playSound(sounds.babyaction2, 1, 0, 0.1, false);
+        this.previousState = this.state;
+    }
+   
     if(!inView(this, 20)){
-        this.state = HOME;
-        
+        this.state = HOME; 
     }
 
     this.targetAngle += 0.015;
-    //this.state = HOME;
     if(p.enemiesInView.length > 0 && this.state != ATTACKING){
         this.enemyTarget = choice(p.enemiesInView);
         this.state = ATTACKING;
@@ -72,6 +76,9 @@ Baby.prototype.update = function(){
         case HOME:
             this.targetX = p.x + Math.cos(this.angle) * (p.radius + 7+babies.length-p.xVel*2); 
             this.targetY = p.y + Math.sin(this.angle) * (p.radius + 7+babies.length-p.yVel*2);
+            if(this.enemyTarget){
+                this.enemyTarget.attacked = false;
+            }
             
         break;
 
@@ -84,7 +91,9 @@ Baby.prototype.update = function(){
             this.targetX = this.enemyTarget.x + Math.cos(this.angle) * (this.enemyTarget.radius + 5);
             this.targetY = this.enemyTarget.y + Math.sin(this.angle) * (this.enemyTarget.radius + 5);
             this.enemyTarget.health -= 0.2;
+            //this.enemyTarget.underAttack = true;
             if(!this.enemyTarget.alive){
+                //playSound(sounds.babyaction1, 1, 0, 0.1, false);
                 this.enemyTarget = choice(p.enemiesInView);
             }
         break;

@@ -10,12 +10,17 @@ var RetroBuffer = function(width, height, atlas, pages){
     this.SCREEN = 0;
     this.PAGE_1= this.PAGESIZE;
     this.PAGE_2= this.PAGESIZE*2;
+    this.PAGE_3= this.PAGESIZE*3;
+    this.PAGE_4= this.PAGESIZE*4;
   
     //relative drawing position and pencolor, for drawing functions that require it.
     this.cursorX = 0;
     this.cursorY = 0;
     this.cursorColor = 23;
     this.cursorColor2 = 25;
+    this.stencil = false;
+    this.stencilSource = this.PAGE_2;
+    this.stencilOffset = 0;
 
     
     this.colors = this.atlas.slice(0, 64);
@@ -110,7 +115,7 @@ var RetroBuffer = function(width, height, atlas, pages){
   RetroBuffer.prototype.pset = function pset(x,y, color, color2=64) { 
     x = x|0;
     y = y|0;
-    color = (color|0)%64;
+    color = this.stencil ? this.pget(x,y, this.stencilSource)+this.stencilOffset : (color|0)%64;
     let px = (y % 4) * 4 + (x% 4);
     let mask = this.pat & Math.pow(2, px);
     let pcolor = mask ? color : color2;
@@ -332,8 +337,11 @@ var RetroBuffer = function(width, height, atlas, pages){
         py = (i*yratio)|0;
         sy = flipy ? (sh - py - i) : sy;
         sx = flipx ? (sw - px - j) : sx;
-
-        this.pset(x+j, y+i, this.pget(sx + px, sy + py, this.renderSource));
+        source = this.pget(sx + px, sy + py, this.renderSource);
+        if(source > 0){
+          this.pset(x+j, y+i, source);
+        }
+        
 
       }
     }
@@ -341,26 +349,26 @@ var RetroBuffer = function(width, height, atlas, pages){
 
   RetroBuffer.prototype.outline = function outline(renderSource, renderTarget, color, color2, color3, color4){
   
-    for(let i = 0; i <= WIDTH; i++ ){
-      for(let j = 0; j <= HEIGHT; j++){
-        let left = i-1 + j * WIDTH;
-        let right = i+1 + j * WIDTH;
-        let bottom = i + (j+1) * WIDTH;
-        let top = i + (j-1) * WIDTH;
-        let current = i + j * WIDTH;
+    for(let i = 0; i <= this.WIDTH; i++ ){
+      for(let j = 0; j <= this.HEIGHT; j++){
+        let left = i-1 + j * this.WIDTH;
+        let right = i+1 + j *this. WIDTH;
+        let bottom = i + (j+1) * this.WIDTH;
+        let top = i + (j-1) * this.WIDTH;
+        let current = i + j * this.WIDTH;
   
-        if(ram[renderSource + current]){
-          if(!ram[renderSource + left]){
-            ram[renderTarget + left] = color;
+        if(this.ram[this.renderSource + current]){
+          if(this.ram[this.renderSource + left]==64){
+            this.ram[this.renderTarget + left] = color;
           };
-          if(!ram[renderSource + right]){
-            ram[renderTarget + right] = color3;
+          if(this.ram[this.renderSource + right]==64){
+            this.ram[this.renderTarget + right] = color3;
           };
-          if(!ram[renderSource + top]){
-            ram[renderTarget + top] = color2;
+          if(this.ram[this.renderSource + top]==64){
+            this.ram[this.renderTarget + top] = color2;
           };
-          if(!ram[renderSource + bottom]){
-            ram[renderTarget + bottom] = color4;
+          if(this.ram[this.renderSource + bottom]==64){
+            this.ram[this.renderTarget + bottom] = color4;
           };
         }
       }

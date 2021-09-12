@@ -286,6 +286,9 @@ Player = {
     reset: function(){
         this.fuel = 100;
         this.xVel = this.yVel = 0;
+        p.x = Ww/2;
+        p.y = Wh/2;
+        babies = [];
     }
 
 
