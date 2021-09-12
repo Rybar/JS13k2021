@@ -111,6 +111,7 @@ Planet.prototype.update = function(){
     if(inView(this, 200)){
         this.reaching = false;
         if(!this.populated){
+            planetsDiscovered++;
             this.field = this.radius + 45;
             this.haloColor=choice([18,15,29]);
             this.sectors = Math.round(this.radius/10);

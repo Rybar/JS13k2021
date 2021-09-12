@@ -1,13 +1,8 @@
 /*
 TODO:  Prioritized
 
-tutorial area: middle of screen
-  3 small planets with no drones and enough fuel to complete at least 1,
-  1 planet with harvester
-  tut text objects explaining mechanics?
 
-mini-map and help text
-show 'M for Map' on gameplay screen
+mini-map
 show completed planets
   as percentage or ratio
 show # of babies
@@ -24,9 +19,6 @@ giant flying drones
 balance
   tighten up controls
   find goldilocks zone for planet spawn density
-  more drones
-  more small planets with no harvesters near player at start
-  weighted more tiny planets in general
 
  
 
@@ -165,16 +157,8 @@ collected = [];
 babies = [];
 drones = [];
 
-
-
 artifacts = [];
 
-help= {
-playerControls: "ARROWS / ZQSD / WASD TO MOVE",
-completePlanets: "COMPLETE PLANETS\nTO GET MORE ENERGY",
-harvesters: "HARVESTERS CAN BE/\nKILLED BY PLANET SPRITES",
-
-}
 sounds = {};
 soundsReady = 0;
 totalSounds = 8;
@@ -199,6 +183,7 @@ function initGameData(){
   pl.x = p.x - 100;
   pl.y = p.y - 100;
   pl.radius = 25;
+  pl.harvesters = 0;
   planets.push(pl);
 
   pl = new Planet;
@@ -207,37 +192,58 @@ function initGameData(){
   pl.radius = 25;
   pl.color = 4;
   pl.harvesters = 0;
-
   planets.push(pl);
 
-  // let d = new Drone();
-  // d.x = p.x + 400;
-  // d.y = p.y;
-  // d.radius = 25;
-  // drones.push(d);
+  pl = new Planet;
+  pl.x = p.x ;
+  pl.y = p.y+ 100;
+  pl.radius = 25;
+  pl.color = 22;
+  pl.harvesters = 0;
+  planets.push(pl);
+
+  pl = new Fuel(p.x + 150, p.y, 20);
+  Fuelrocks.push(pl);
 
 //---------------------------------------------------------------------
 
   
 
-  for(let i = 0; i < 1000; i++){
+  for(let i = 0; i < 1500; i++){
     let p = new Planet()
     p.x = Math.floor( Math.random()*(Ww-w*2)+h); //spawn planets not too close to edge of world
     p.y = Math.floor( Math.random()*(Wh-h*2)+h);
 
-    let radius = Math.min(Math.floor(Math.random()*h/3*.9+20), h/3);
+    let radius = Math.max(Math.floor(Math.random()*h*.45), 10);
     p.radius = radius;
     p.field = radius + 45;
-    p.harvesters = 1 + Math.floor(Math.random()*5);
+    p.harvesters = Math.floor(p.radius/20) + Math.floor(Math.random()*5);
     let c = Math.floor(Math.random()*(55));
     p.color = c;
     collides = true;
-    if(doesPlanetHaveCollision(p, 200)){
+    if(doesPlanetHaveCollision(p, 100)){
       continue;
     }
     else{planets.push(p)};
   }
-  for(let i = 0; i < 150; i++){  
+  //a batch of super small planets
+  for(let i = 0; i < 300; i++){
+    let p = new Planet()
+    p.x = Math.floor( Math.random()*(Ww-w*2)+h); //spawn planets not too close to edge of world
+    p.y = Math.floor( Math.random()*(Wh-h*2)+h);
+
+    p.radius = 15;
+    p.field = p.radius + 45;
+    p.harvesters = Math.round(Math.random());
+    let c = Math.floor(Math.random()*(55));
+    p.color = c;
+    collides = true;
+    if(doesPlanetHaveCollision(p, 100)){
+      continue;
+    }
+    else{planets.push(p)};
+  }
+  for(let i = 0; i < 200; i++){  
     let replacePlanet = planets[procGenStart + Math.floor(Math.random()*(planets.length-procGenStart))]; 
     let d = new Fuel(0,0,1);
     d.x = replacePlanet.x;
@@ -247,12 +253,12 @@ function initGameData(){
     
     Fuelrocks.push(d);
   }
-  for(let i = 0; i < 50; i++){
+  for(let i = 0; i < 150; i++){
     let replacePlanet = planets[procGenStart + Math.floor(Math.random()*(planets.length-procGenStart))];
     let d = new Drone();
     d.x = replacePlanet.x;
     d.y = replacePlanet.y;
-    d.radius = 15 + Math.random()*15;
+    d.radius = Math.max(Math.random()*30, 10);
     planets.splice(planets.indexOf(replacePlanet), 1);
     drones.push(d);
   }
@@ -433,7 +439,11 @@ function drawMiniMap(){
   });
 
   Fuelrocks.forEach(function(f){
-    r.pset(f.x/mapFactorW - mapViewX, f.y/mapFactorH - mapViewY, 8)
+    r.pset(f.x/mapFactorW - mapViewX, f.y/mapFactorH - mapViewY, 10);
+    r.pset(f.x/mapFactorW - mapViewX+1, f.y/mapFactorH - mapViewY, 10);
+    r.pset(f.x/mapFactorW - mapViewX-1, f.y/mapFactorH - mapViewY, 10);
+    r.pset(f.x/mapFactorW - mapViewX, f.y/mapFactorH+1 - mapViewY, 10);
+    r.pset(f.x/mapFactorW - mapViewX, f.y/mapFactorH-1 - mapViewY, 10);
   });
   harvesters.forEach(function(f){
     r.pset(f.x/mapFactorW - mapViewX, f.y/mapFactorH - mapViewY, 4)
@@ -451,8 +461,9 @@ function drawMiniMap(){
   r.pset((p.x/mapFactorW)-2-mapViewX, (p.y/mapFactorH)-2-mapViewY, 22);
   r.pset((p.x/mapFactorW)-2-mapViewX, (p.y/mapFactorH)+2-mapViewY, 22);
   r.pset((p.x/mapFactorW)+2-mapViewX, (p.y/mapFactorH)-2-mapViewY, 22);
-}
+  }
 
+  r.text([`${planetsDiscovered}/${planets.length} PLANETS DISCOVERED  ${planetsComplete} PLANETS COMPLETE`, w/2, 15, 1, 3, 'center', 'top', 1, 7]);
 }
 
 function drawHUD(){
