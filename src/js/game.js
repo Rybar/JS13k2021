@@ -78,7 +78,7 @@ import babyaction2 from './sounds/babyaction2.js';
 import dronemoan from './sounds/dronemoan.js';
 import harvestermoan from './sounds/harvestermoan.js';
 
-import { playSound, Key, choice, inView, doesPlanetHaveCollision } from './core/utils.js';
+import { playSound, Key, choice, inView, doesPlanetHaveCollision, lerp } from './core/utils.js';
 //import Stats from './Stats.js';
 import Player from './player.js';
 import Planet from './planet.js';
@@ -91,8 +91,7 @@ import { reset } from 'browser-sync';
 window.baby = Baby;
 //stats = new Stats();
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-
-
+document.body.style="margin:0; background-color:black; overflow:hidden";
 if(innerWidth < 800){
   w = innerWidth;
 h = innerHeight;
@@ -407,10 +406,17 @@ function initAudio(){
 }
 
 function drawMiniMap(){
+  if(mapTriggered){
+    scale = wwFactor;
+    mapTriggered = false;
+  }
+  
+  scaleTarget = 3;
+  scale = lerp(scale, scaleTarget, 0.3);
   r.pal = r.palDefault
   r.fillRect(0,0,w,h,0);
-  let mapFactorW = wwFactor/3;
-  let mapFactorH = hhFactor/3;
+  let mapFactorW = wwFactor/scale;
+  let mapFactorH = hhFactor/scale;
   view.x = p.x - mw*mapFactorW;
   view.y = p.y - mh*mapFactorH;
   let mapViewX = (view.x)/mapFactorW;
@@ -561,9 +567,11 @@ function updateGame(){
 
   if(Key.justReleased(Key.m)){
     minimapToggle = !minimapToggle;
+    mapTriggered = true;
   }
   if(Key.justReleased(Key.h)){
     helpToggle = !helpToggle;
+    
   }
   if(Key.justReleased(Key.r)){
     resetGame();
