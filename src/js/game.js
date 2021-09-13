@@ -208,7 +208,7 @@ function initGameData(){
 
   
 
-  for(let i = 0; i < 1500; i++){
+  for(let i = 0; i < 1000; i++){
     let p = new Planet()
     p.x = Math.floor( Math.random()*(Ww-w*2)+h); //spawn planets not too close to edge of world
     p.y = Math.floor( Math.random()*(Wh-h*2)+h);
@@ -226,7 +226,7 @@ function initGameData(){
     else{planets.push(p)};
   }
   //a batch of super small planets
-  for(let i = 0; i < 300; i++){
+  for(let i = 0; i < 100; i++){
     let p = new Planet()
     p.x = Math.floor( Math.random()*(Ww-w*2)+h); //spawn planets not too close to edge of world
     p.y = Math.floor( Math.random()*(Wh-h*2)+h);
@@ -252,7 +252,7 @@ function initGameData(){
     
     Fuelrocks.push(d);
   }
-  for(let i = 0; i < 150; i++){
+  for(let i = 0; i < 125; i++){
     let replacePlanet = planets[procGenStart + Math.floor(Math.random()*(planets.length-procGenStart))];
     let d = new Drone();
     d.x = replacePlanet.x;
@@ -285,13 +285,6 @@ function initGameData(){
     }
     stars.push({x:x, y:y, star:star});
   }
-  // for(let i = 0; i < 50000; i++){
-  //   stars.push({
-  //     x: Math.floor(Math.random()*(Ww)), 
-  //     y: Math.floor(Math.random()*(Wh)),
-  //     c: Math.floor(Math.random()*(3))
-  //   });
-  // }
 
   //Green stardust behind fuel rocks
   Fuelrocks.forEach(function(f){
@@ -412,7 +405,7 @@ function drawMiniMap(){
   }
   
   scaleTarget = 3;
-  scale = lerp(scale, scaleTarget, 0.3);
+  scale = lerp(scale, scaleTarget, 0.5);
   r.pal = r.palDefault
   r.fillRect(0,0,w,h,0);
   let mapFactorW = wwFactor/scale;
@@ -423,11 +416,15 @@ function drawMiniMap(){
   let mapViewY = (view.y)/mapFactorH;
 
   r.pat = r.dither[8]
-  stars.forEach(function(e){
-    if(inView(e, mapFactorW*Ww)){
-      e.star.forEach(function(s){
-        r.pset(s.x/mapFactorW - mapViewX, s.y/mapFactorH-mapViewY, 1);
-      })
+  stars.forEach(function(e, i){
+    if(i%2 == 0){
+      if(inView(e, mapFactorW*Ww)){
+        if(i%5 ==0){
+          e.star.forEach(function(s, i){
+            r.pset(s.x/mapFactorW - mapViewX, s.y/mapFactorH-mapViewY, 1);
+          })
+        }
+      }
     }
   });
   r.pat = r.dither[0];

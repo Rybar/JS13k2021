@@ -66,7 +66,7 @@ Harvester.prototype.update = function(){
                 } 
         }else {this.reaching = false; p.draining = false;}
         if(this.health < 100 && !this.attacked){
-            playSound(sounds.harvestermoan);
+            playSound(sounds.harvestermoan, 2, 0, 0.2, false);
             this.attacked = true;
         }
         if(this.health <= 0){

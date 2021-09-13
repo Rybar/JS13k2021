@@ -74,8 +74,8 @@ Baby.prototype.update = function(){
     switch(this.state){
 
         case HOME:
-            this.targetX = p.x + Math.cos(this.angle) * (p.radius + 7+babies.length-p.xVel*2); 
-            this.targetY = p.y + Math.sin(this.angle) * (p.radius + 7+babies.length-p.yVel*2);
+            this.targetX = p.x + Math.cos(this.angle) * (p.radius +babies.length-p.xVel*2)+Math.cos(this.angle*7)*20; 
+            this.targetY = p.y + Math.sin(this.angle) * (p.radius +babies.length-p.yVel*2)+Math.sin(this.angle*7.1)*20; 
             if(this.enemyTarget){
                 this.enemyTarget.attacked = false;
             }
