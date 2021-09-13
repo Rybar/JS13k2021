@@ -46,7 +46,6 @@ Fuel.prototype.update = function(){
 
         this.dist = Math.sqrt(distx*distx + disty*disty);
         if( this.dist <= this.radius + p.radius + 40){
-            p.absorbing = false;
             if(p.fuel < p.maxFuel){
                 this.radius -= 0.1;
                 p.fuel += 1;
